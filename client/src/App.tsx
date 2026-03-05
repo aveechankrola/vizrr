@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import './style.css'
+import heroImg1 from './assets/1.jpeg'
+import heroImg2 from './assets/2.jpeg'
+import heroImg3 from './assets/3.jpeg'
+import heroImg4 from './assets/4.jpeg'
+import heroImg5 from './assets/5.jpeg'
 import {
   fetchProducts,
   addToCart,
@@ -78,6 +83,12 @@ function App() {
 
   // ── Admin state ────────────────────────────────────────────
   const [adminToken, setAdminToken] = useState<string | null>(() => localStorage.getItem('keprates_admin_token'))
+
+  // ── Hero slider ────────────────────────────────────────────
+  const heroImages = [heroImg1, heroImg2, heroImg3, heroImg4, heroImg5]
+  const [heroSlideIndex, setHeroSlideIndex] = useState(0)
+  const heroPrev = () => setHeroSlideIndex(i => (i - 1 + heroImages.length) % heroImages.length)
+  const heroNext = () => setHeroSlideIndex(i => (i + 1) % heroImages.length)
   const [adminPageOpen, setAdminPageOpen] = useState(false)
   const [adminTab, setAdminTab] = useState<'dashboard' | 'orders' | 'products' | 'users'>('dashboard')
   const [adminLoginForm, setAdminLoginForm] = useState({ email: '', password: '' })
@@ -607,7 +618,7 @@ function App() {
               <div className="hero-card">
                 <div className="hero-image-circle" />
                 <img
-                  src="https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg?auto=compress&cs=tinysrgb&w=900"
+                  src={heroImages[heroSlideIndex]}
                   alt="Indulgent chocolate"
                   className="hero-image"
                 />
@@ -647,10 +658,10 @@ function App() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.45 }}
                 >
-                  <button className="slider-arrow" aria-label="Previous">
+                  <button className="slider-arrow" aria-label="Previous" onClick={heroPrev}>
                     ←
                   </button>
-                  <button className="slider-arrow slider-arrow--primary" aria-label="Next">
+                  <button className="slider-arrow slider-arrow--primary" aria-label="Next" onClick={heroNext}>
                     →
                   </button>
                 </motion.div>
