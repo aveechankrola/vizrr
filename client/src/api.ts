@@ -1,6 +1,6 @@
 const BASE = 'http://localhost:4000/api'
 
-export type ProductCategory = 'cake' | 'chocolate'
+export type ProductCategory = 'chocolate-cake' | 'chocolate'
 
 export type Product = {
   id: number
