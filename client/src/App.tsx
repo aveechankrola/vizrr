@@ -623,8 +623,8 @@ function App() {
               </motion.p>
 
               <motion.div className="hero-buttons" variants={fadeInUp}>
-                <button className="btn btn-primary">Order Now</button>
-                <button className="btn btn-outline">Explore More</button>
+                <button className="btn btn-primary" onClick={() => { if (!isSignedIn) { openSignIn() } else { setCartOpen(true) } }}>Order Now</button>
+                <button className="btn btn-outline" onClick={() => setActivePage('product')}>Explore More</button>
               </motion.div>
             </motion.section>
 
