@@ -145,7 +145,7 @@ function App() {
     setAdminOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o))
   }
 
-  async function handleAdminDeleteProduct(id: number) {
+  async function handleAdminDeleteProduct(id: string) {
     if (!adminToken) return
     await adminDeleteProduct(adminToken, id)
     setAdminProducts(prev => prev.filter(p => p.id !== id))
@@ -190,7 +190,7 @@ function App() {
   const [cartTotal, setCartTotal] = useState(0)
   const [cartCount, setCartCount] = useState(0)
   const [cartLoading, setCartLoading] = useState(false)
-  const [addingId, setAddingId] = useState<number | null>(null)
+  const [addingId, setAddingId] = useState<string | null>(null)
   const [removingId, setRemovingId] = useState<number | null>(null)
 
   const refreshCart = useCallback(async () => {
@@ -406,7 +406,7 @@ function App() {
       .finally(() => setProductsLoading(false))
   }, [activePage, filter, sortBy])
 
-  async function handleAddToCart(productId: number) {
+  async function handleAddToCart(productId: string) {
     setAddingId(productId)
     try {
       await addToCart(productId)
