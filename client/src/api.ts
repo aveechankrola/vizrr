@@ -160,7 +160,7 @@ export type CheckoutCustomer = {
   pincode: string
 }
 
-export type OrderItem = { productId: number; quantity: number }
+export type OrderItem = { productId: string; quantity: number }
 
 export type OrderResult = {
   orderId: string
