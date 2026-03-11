@@ -1,6 +1,7 @@
 require('dotenv').config({ path: require('path').join(__dirname, '.env') })
 const express = require('express')
 const cors = require('cors')
+const path = require('path')
 const connectDB = require('./db')
 
 const productsRouter = require('./routes/products')
@@ -19,7 +20,10 @@ const PORT = process.env.PORT || 4000
 connectDB()
 
 // ── Middleware ────────────────────────────────────────────────
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }))
+const allowedOrigins = process.env.CLIENT_ORIGIN
+  ? process.env.CLIENT_ORIGIN.split(',')
+  : ['http://localhost:5173']
+app.use(cors({ origin: allowedOrigins, credentials: true }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
@@ -38,7 +42,14 @@ app.get('/api/health', (_req, res) => {
   res.json({ success: true, message: 'Keprates API is running', timestamp: new Date().toISOString() })
 })
 
-// ── 404 handler ───────────────────────────────────────────────
+// ── Serve React client (production) ─────────────────────────
+const clientDist = path.join(__dirname, '../client/dist')
+app.use(express.static(clientDist))
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientDist, 'index.html'))
+})
+
+// ── 404 handler (API-only fallback) ──────────────────────────
 app.use((_req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' })
 })
