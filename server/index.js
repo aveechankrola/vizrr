@@ -2,6 +2,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '.env') })
 const express = require('express')
 const cors = require('cors')
 const path = require('path')
+const { clerkMiddleware } = require('@clerk/express')
 const connectDB = require('./db')
 
 const productsRouter = require('./routes/products')
@@ -30,6 +31,7 @@ app.use(cors({
   },
   credentials: true
 }))
+app.use(clerkMiddleware())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 

@@ -1,21 +1,11 @@
 const express = require('express')
 const router = express.Router()
+const { requireAuth } = require('@clerk/express')
 const Address = require('../models/Address')
-const { sessions } = require('../data/store')
-
-function requireAuth(req, res) {
-  const token = req.headers.authorization?.replace('Bearer ', '')
-  if (!token || !sessions[token]) {
-    res.status(401).json({ success: false, message: 'Not authenticated.' })
-    return null
-  }
-  return sessions[token]
-}
 
 // GET /api/addresses
-router.get('/', async (req, res) => {
-  const userId = requireAuth(req, res)
-  if (!userId) return
+router.get('/', requireAuth(), async (req, res) => {
+  const userId = req.auth.userId
   try {
     const addrs = await Address.find({ userId })
     res.json({ success: true, data: addrs })
@@ -25,9 +15,8 @@ router.get('/', async (req, res) => {
 })
 
 // POST /api/addresses
-router.post('/', async (req, res) => {
-  const userId = requireAuth(req, res)
-  if (!userId) return
+router.post('/', requireAuth(), async (req, res) => {
+  const userId = req.auth.userId
   try {
     const { label, firstName, lastName, phone, address, city, pincode } = req.body
     if (!address || !city || !pincode) {
@@ -50,9 +39,8 @@ router.post('/', async (req, res) => {
 })
 
 // DELETE /api/addresses/:id
-router.delete('/:id', async (req, res) => {
-  const userId = requireAuth(req, res)
-  if (!userId) return
+router.delete('/:id', requireAuth(), async (req, res) => {
+  const userId = req.auth.userId
   try {
     await Address.findOneAndDelete({ _id: req.params.id, userId })
     res.json({ success: true })

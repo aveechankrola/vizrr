@@ -1,9 +1,9 @@
 const express = require('express')
 const router = express.Router()
+const { requireAuth } = require('@clerk/express')
 const Product = require('../models/Product')
 const Order = require('../models/Order')
 const Wallet = require('../models/Wallet')
-const { sessions } = require('../data/store')
 
 let nextOrderId = 1000
 
@@ -11,7 +11,7 @@ let nextOrderId = 1000
 router.post('/', async (req, res) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '')
-    const userId = token && sessions[token] ? sessions[token] : null
+    const userId = req.auth?.userId ?? null
     const { customer, items, paymentMethod } = req.body
 
     const required = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'pincode']
@@ -88,13 +88,9 @@ router.post('/', async (req, res) => {
 })
 
 // GET /api/orders/my  — orders for the logged-in user
-router.get('/my', async (req, res) => {
+router.get('/my', requireAuth(), async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '')
-    if (!token || !sessions[token]) {
-      return res.status(401).json({ success: false, message: 'Not authenticated.' })
-    }
-    const userId = sessions[token]
+    const userId = req.auth.userId
     const myOrders = await Order.find({ userId }).sort({ placedAt: -1 })
     res.json({ success: true, data: myOrders })
   } catch (err) {
@@ -103,13 +99,9 @@ router.get('/my', async (req, res) => {
 })
 
 // PATCH /api/orders/:id/cancel
-router.patch('/:id/cancel', async (req, res) => {
+router.patch('/:id/cancel', requireAuth(), async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '')
-    if (!token || !sessions[token]) {
-      return res.status(401).json({ success: false, message: 'Not authenticated.' })
-    }
-    const userId = sessions[token]
+    const userId = req.auth.userId
     const order = await Order.findOne({ orderId: req.params.id, userId })
     if (!order) return res.status(404).json({ success: false, message: 'Order not found.' })
     if (order.status === 'cancelled') {

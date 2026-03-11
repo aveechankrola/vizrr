@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useUser, useAuth, useClerk } from '@clerk/react'
 import './style.css'
 import heroImg1 from './assets/1.jpeg'
 import heroImg2 from './assets/2.jpeg'
@@ -15,9 +16,6 @@ import {
   clearCart,
   submitContact,
   placeOrder,
-  registerUser,
-  loginUser,
-  logoutUser,
   fetchMyOrders,
   cancelOrder,
   fetchAddresses,
@@ -38,7 +36,6 @@ import {
   type ContactPayload,
   type CheckoutCustomer,
   type OrderResult,
-  type AuthUser,
   type MyOrder,
   type SavedAddress,
   type WalletData,
@@ -202,70 +199,14 @@ function App() {
     } catch { /* server may not be up */ }
   }, [])
 
-  // ── Auth state ──────────────────────────────────────────────
-  const [authUser, setAuthUser] = useState<AuthUser | null>(() => {
-    try {
-      const s = localStorage.getItem('keprates_user')
-      return s ? JSON.parse(s) : null
-    } catch { return null }
-  })
-  const [authToken, setAuthToken] = useState<string | null>(() => localStorage.getItem('keprates_token'))
-  const [authModalOpen, setAuthModalOpen] = useState(false)
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
+  // ── Auth (Clerk) ─────────────────────────────────────────────
+  const { user, isSignedIn } = useUser()
+  const { getToken } = useAuth()
+  const { openSignIn, signOut } = useClerk()
   const [pendingCheckout, setPendingCheckout] = useState(false)
-  const [authForm, setAuthForm] = useState({ firstName: '', lastName: '', email: '', password: '', phone: '' })
-  const [authStatus, setAuthStatus] = useState<'idle' | 'loading' | 'error'>('idle')
-  const [authError, setAuthError] = useState('')
-
-  function handleAuthChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setAuthForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
-  }
-
-  async function handleAuthSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setAuthStatus('loading')
-    setAuthError('')
-    try {
-      // ── Admin credential intercept ──────────────────────────
-      if (authMode === 'login' && authForm.email === 'admin@keprates.com') {
-        const token = await adminLogin(authForm.email, authForm.password)
-        localStorage.setItem('keprates_admin_token', token)
-        setAdminToken(token)
-        setAuthStatus('idle')
-        setAuthModalOpen(false)
-        setAuthForm({ firstName: '', lastName: '', email: '', password: '', phone: '' })
-        setAdminPageOpen(true)
-        return
-      }
-      const result = authMode === 'register'
-        ? await registerUser(authForm.firstName, authForm.lastName, authForm.email, authForm.password, authForm.phone)
-        : await loginUser(authForm.email, authForm.password)
-      localStorage.setItem('keprates_token', result.token)
-      localStorage.setItem('keprates_user', JSON.stringify(result.user))
-      setAuthToken(result.token)
-      setAuthUser(result.user)
-      setAuthStatus('idle')
-      setAuthModalOpen(false)
-      setAuthForm({ firstName: '', lastName: '', email: '', password: '', phone: '' })
-      if (pendingCheckout) {
-        setPendingCheckout(false)
-        setCartOpen(false)
-        setActivePage('checkout')
-        setCheckoutStatus('idle')
-        setOrderResult(null)
-      }
-    } catch (err: unknown) {
-      setAuthStatus('error')
-      setAuthError(err instanceof Error ? err.message : 'Something went wrong.')
-    }
-  }
 
   async function handleLogout() {
-    if (authToken) await logoutUser(authToken).catch(() => {})
-    localStorage.removeItem('keprates_token')
-    localStorage.removeItem('keprates_user')
-    setAuthToken(null)
-    setAuthUser(null)
+    await signOut()
     if (activePage === 'checkout' || activePage === 'account') setActivePage('home')
   }
 
@@ -284,21 +225,37 @@ function App() {
   // Wallet
   const [wallet, setWallet] = useState<WalletData>({ balance: 0, transactions: [] })
 
-  // Fetch addresses whenever user is logged in (needed for checkout pre-fill too)
+  // Fetch addresses whenever Clerk auth status changes
   useEffect(() => {
-    if (!authToken) { setSavedAddresses([]); return }
-    fetchAddresses(authToken).then(setSavedAddresses).catch(() => {})
-  }, [authToken])
+    if (!isSignedIn) { setSavedAddresses([]); return }
+    getToken().then(token => {
+      if (token) fetchAddresses(token).then(setSavedAddresses).catch(() => {})
+    })
+  }, [isSignedIn])
 
   useEffect(() => {
-    if (activePage !== 'account' || !authToken) return
+    if (activePage !== 'account' || !isSignedIn) return
     setOrdersLoading(true)
-    fetchMyOrders(authToken)
-      .then(setMyOrders)
-      .catch(() => setMyOrders([]))
-      .finally(() => setOrdersLoading(false))
-    fetchWallet(authToken).then(setWallet).catch(() => {})
-  }, [activePage, authToken])
+    getToken().then(token => {
+      if (!token) return
+      fetchMyOrders(token)
+        .then(setMyOrders)
+        .catch(() => setMyOrders([]))
+        .finally(() => setOrdersLoading(false))
+      fetchWallet(token).then(setWallet).catch(() => {})
+    })
+  }, [activePage, isSignedIn])
+
+  // Resume pending checkout after Clerk sign-in
+  useEffect(() => {
+    if (isSignedIn && pendingCheckout) {
+      setPendingCheckout(false)
+      setCartOpen(false)
+      setActivePage('checkout')
+      setCheckoutStatus('idle')
+      setOrderResult(null)
+    }
+  }, [isSignedIn])
 
   // ── Checkout state ─────────────────────────────────────────
   const [checkoutForm, setCheckoutForm] = useState<CheckoutCustomer>({
@@ -318,8 +275,9 @@ function App() {
     setCheckoutStatus('loading')
     setCheckoutError('')
     try {
+      const token = await getToken()
       const items = cartItems.map((i) => ({ productId: i.productId, quantity: i.quantity }))
-      const result = await placeOrder(checkoutForm, items, paymentMethod, authToken)
+      const result = await placeOrder(checkoutForm, items, paymentMethod, token)
       setOrderResult(result)
       setCheckoutStatus('success')
       await clearCart()
@@ -333,18 +291,18 @@ function App() {
   // ── Address handlers ────────────────────────────────────────
   async function handleAddAddress(e: React.FormEvent) {
     e.preventDefault()
-    if (!authToken) return
+    const token = await getToken()
+    if (!token) return
     setAddAddrLoading(true)
     setAddAddrError('')
     try {
-      const created = await addAddress(authToken, addAddrForm)
+      const created = await addAddress(token, addAddrForm)
       setSavedAddresses((prev) => [...prev, created])
       setAddAddrOpen(false)
       setAddAddrForm({ label: 'Home', firstName: '', lastName: '', phone: '', address: '', city: '', pincode: '' })
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to save address.'
       if (msg.toLowerCase().includes('authenticated') || msg.toLowerCase().includes('401')) {
-        // Session expired — force re-login
         handleLogout()
       } else {
         setAddAddrError(msg)
@@ -355,31 +313,33 @@ function App() {
   }
 
   async function handleDeleteAddress(id: number) {
-    if (!authToken) return
-    await deleteAddress(authToken, id)
+    const token = await getToken()
+    if (!token) return
+    await deleteAddress(token, id)
     setSavedAddresses((prev) => prev.filter((a) => a.id !== id))
   }
 
   async function handleCancelOrder(orderId: string) {
-    if (!authToken) return
+    const token = await getToken()
+    if (!token) return
     try {
-      await cancelOrder(authToken, orderId)
+      await cancelOrder(token, orderId)
       setMyOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: 'cancelled' } : o))
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : 'Could not cancel order.')
     }
   }
 
-  // Auto-fill checkout form from logged-in user when checkout opens
+  // Auto-fill checkout form from Clerk user when checkout opens
   useEffect(() => {
-    if (activePage !== 'checkout' || !authUser) return
+    if (activePage !== 'checkout' || !isSignedIn || !user) return
     setCheckoutForm((prev) => ({
       ...prev,
-      firstName: prev.firstName || authUser.firstName,
-      lastName: prev.lastName || authUser.lastName,
-      email: authUser.email,
+      firstName: prev.firstName || (user.firstName ?? ''),
+      lastName: prev.lastName || (user.lastName ?? ''),
+      email: user.emailAddresses[0]?.emailAddress ?? '',
     }))
-  }, [activePage, authUser])
+  }, [activePage, isSignedIn, user])
 
   // ── Contact state ───────────────────────────────────────────
   const [contactForm, setContactForm] = useState<ContactPayload>({
@@ -530,10 +490,10 @@ function App() {
             className={`nav-link${activePage === 'account' ? ' nav-link--active' : ''}`}
             onClick={(e) => {
               e.preventDefault()
-              if (authUser) {
+              if (isSignedIn) {
                 setActivePage('account')
               } else {
-                setAuthModalOpen(true)
+                openSignIn()
               }
             }}
           >
@@ -968,7 +928,7 @@ function App() {
         )}
 
         {/* ── Account Page ──────────────────────────────────── */}
-        {activePage === 'account' && authUser && (
+        {activePage === 'account' && isSignedIn && user && (
           <motion.div
             key="account"
             variants={pageVariants}
@@ -982,10 +942,10 @@ function App() {
                 {/* Left — profile card */}
                 <aside className="account-sidebar">
                   <div className="account-avatar-lg">
-                    {authUser.firstName[0]}{authUser.lastName[0]}
+                    {(user.firstName ?? '?')[0]}{(user.lastName ?? '?')[0]}
                   </div>
-                  <h2 className="account-display-name">{authUser.firstName} {authUser.lastName}</h2>
-                  <p className="account-email">{authUser.email}</p>
+                  <h2 className="account-display-name">{user.firstName} {user.lastName}</h2>
+                  <p className="account-email">{user.emailAddresses[0]?.emailAddress}</p>
                   <div className="account-info-list">
                     <div className="account-info-row">
                       <span className="account-info-label">Member since</span>
@@ -1261,7 +1221,7 @@ function App() {
                       <div className="contact-error">⚠ {checkoutError}</div>
                     )}
                     {/* Saved address quick-fill */}
-                    {authUser && savedAddresses.length > 0 && (
+                    {isSignedIn && savedAddresses.length > 0 && (
                       <div className="checkout-saved-addresses">
                         <p className="checkout-saved-label">Use a saved address</p>
                         <div className="checkout-address-pills">
@@ -1351,87 +1311,6 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* ── Auth Modal ────────────────────────────────────── */}
-      <AnimatePresence>
-        {authModalOpen && (
-          <motion.div
-            key="auth-overlay"
-            className="auth-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            onClick={(e) => { if (e.target === e.currentTarget) { setAuthModalOpen(false); setPendingCheckout(false) } }}
-          >
-            <motion.div
-              className="auth-modal"
-              initial={{ y: 40, opacity: 0, scale: 0.96 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: 24, opacity: 0, scale: 0.96 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <button className="auth-modal-close" onClick={() => { setAuthModalOpen(false); setPendingCheckout(false) }}>✕</button>
-
-              <div className="auth-modal-brand">🎂</div>
-              <h2 className="auth-modal-title">
-                {authMode === 'login' ? 'Welcome back!' : 'Create account'}
-              </h2>
-              {pendingCheckout && (
-                <p className="auth-modal-hint">
-                  {authMode === 'login' ? 'Sign in to continue to checkout' : 'Create an account to continue to checkout'}
-                </p>
-              )}
-
-              {authStatus === 'error' && (
-                <div className="contact-error">⚠ {authError}</div>
-              )}
-
-              <form className="auth-form" onSubmit={handleAuthSubmit}>
-                {authMode === 'register' && (
-                  <div className="contact-form-row">
-                    <div className="contact-field">
-                      <label className="contact-label">First name</label>
-                      <input className="contact-input" name="firstName" placeholder="Rahul" value={authForm.firstName} onChange={handleAuthChange} required />
-                    </div>
-                    <div className="contact-field">
-                      <label className="contact-label">Last name</label>
-                      <input className="contact-input" name="lastName" placeholder="Doe" value={authForm.lastName} onChange={handleAuthChange} required />
-                    </div>
-                  </div>
-                )}
-                <div className="contact-field">
-                  <label className="contact-label">Email</label>
-                  <input className="contact-input" name="email" type="email" placeholder="rahul@keprates.com" value={authForm.email} onChange={handleAuthChange} required />
-                </div>
-                {authMode === 'register' && (
-                  <div className="contact-field">
-                    <label className="contact-label">Phone (optional)</label>
-                    <input className="contact-input" name="phone" type="tel" placeholder="+91 98765 43210" value={authForm.phone} onChange={handleAuthChange} />
-                  </div>
-                )}
-                <div className="contact-field">
-                  <label className="contact-label">Password</label>
-                  <input className="contact-input" name="password" type="password" placeholder={authMode === 'register' ? 'At least 6 characters' : '••••••••'} value={authForm.password} onChange={handleAuthChange} required />
-                </div>
-                <button type="submit" className="btn btn-primary auth-submit" disabled={authStatus === 'loading'}>
-                  {authStatus === 'loading' ? 'Please wait…' : authMode === 'login' ? 'Sign In' : 'Create Account'}
-                </button>
-              </form>
-
-              <p className="auth-switch">
-                {authMode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-                <button
-                  className="auth-switch-btn"
-                  onClick={() => { setAuthMode(authMode === 'login' ? 'register' : 'login'); setAuthError(''); setAuthStatus('idle') }}
-                >
-                  {authMode === 'login' ? 'Sign up' : 'Sign in'}
-                </button>
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* ── Cart Drawer ────────────────────────────────────── */}
       <AnimatePresence>
         {cartOpen && (
@@ -1511,11 +1390,9 @@ function App() {
                   <button
                     className="btn btn-primary cart-checkout"
                     onClick={() => {
-                      if (!authUser) {
+                      if (!isSignedIn) {
                         setPendingCheckout(true)
-                        setAuthMode('login')
-                        setAuthError('')
-                        setAuthModalOpen(true)
+                        openSignIn()
                       } else {
                         setCartOpen(false)
                         setActivePage('checkout')
