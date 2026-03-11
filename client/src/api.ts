@@ -16,7 +16,7 @@ export type Product = {
 
 export type CartItem = {
   id: number
-  productId: number
+  productId: string
   quantity: number
   product: Product
 }
@@ -375,7 +375,7 @@ export async function adminAddProduct(token: string, product: Omit<Product, 'id'
   return json.data
 }
 
-export async function adminDeleteProduct(token: string, id: number): Promise<void> {
+export async function adminDeleteProduct(token: string, id: string): Promise<void> {
   const res = await fetch(`${BASE}/admin/products/${id}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
