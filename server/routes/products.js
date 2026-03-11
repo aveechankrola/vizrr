@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
     else query = query.sort({ createdAt: 1 })
 
     const products = await query
-    res.json({ success: true, data: products })
+    res.json({ success: true, data: products.map(p => ({ ...p.toObject(), id: p._id.toString() })) })
   } catch (err) {
     res.status(500).json({ success: false, message: err.message })
   }
@@ -28,7 +28,7 @@ router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' })
-    res.json({ success: true, data: product })
+    res.json({ success: true, data: { ...product.toObject(), id: product._id.toString() } })
   } catch (err) {
     res.status(500).json({ success: false, message: err.message })
   }

@@ -3,7 +3,7 @@ const BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000') + '/api'
 export type ProductCategory = 'chocolate-cake' | 'chocolate'
 
 export type Product = {
-  id: number
+  id: string
   name: string
   category: ProductCategory
   price: number
@@ -63,7 +63,7 @@ export async function fetchCart(): Promise<CartResponse> {
   return json
 }
 
-export async function addToCart(productId: number, quantity = 1): Promise<{ count: number }> {
+export async function addToCart(productId: string, quantity = 1): Promise<{ count: number }> {
   const res = await fetch(`${BASE}/cart`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
