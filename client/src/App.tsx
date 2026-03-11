@@ -85,8 +85,12 @@ function App() {
   // ── Hero slider ────────────────────────────────────────────
   const heroImages = [heroImg1, heroImg2, heroImg3, heroImg4, heroImg5]
   const [heroSlideIndex, setHeroSlideIndex] = useState(0)
-  const heroPrev = () => setHeroSlideIndex(i => (i - 1 + heroImages.length) % heroImages.length)
-  const heroNext = () => setHeroSlideIndex(i => (i + 1) % heroImages.length)
+
+  // Auto-advance hero slider every 3.5 seconds
+  useEffect(() => {
+    const t = setInterval(() => setHeroSlideIndex(i => (i + 1) % heroImages.length), 3500)
+    return () => clearInterval(t)
+  }, [])
   const [adminPageOpen, setAdminPageOpen] = useState(false)
   const [adminTab, setAdminTab] = useState<'dashboard' | 'orders' | 'products' | 'users'>('dashboard')
   const [adminLoginForm, setAdminLoginForm] = useState({ email: '', password: '' })
@@ -636,11 +640,21 @@ function App() {
             >
               <div className="hero-card">
                 <div className="hero-image-circle" />
-                <img
-                  src={heroImages[heroSlideIndex]}
-                  alt="Indulgent chocolate"
-                  className="hero-image"
-                />
+                <AnimatePresence mode="sync">
+                  <motion.img
+                    key={heroSlideIndex}
+                    src={heroImages[heroSlideIndex]}
+                    alt="Indulgent chocolate"
+                    className="hero-image"
+                    initial={{ opacity: 0, scale: 1.06 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.96 }}
+                    transition={{ duration: 0.7, ease: 'easeInOut' }}
+                    style={{ position: 'absolute', top: 0, left: '4%' }}
+                  />
+                </AnimatePresence>
+                {/* spacer to keep card height */}
+                <div className="hero-image-spacer" />
 
                 <motion.div
                   className="hero-badge"
@@ -669,20 +683,6 @@ function App() {
                     <span className="hero-star-dim">★</span>
                   </div>
                   <span className="hero-rating-score">4.5</span>
-                </motion.div>
-
-                <motion.div
-                  className="hero-slider"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.45 }}
-                >
-                  <button className="slider-arrow" aria-label="Previous" onClick={heroPrev}>
-                    ←
-                  </button>
-                  <button className="slider-arrow slider-arrow--primary" aria-label="Next" onClick={heroNext}>
-                    →
-                  </button>
                 </motion.div>
               </div>
             </motion.section>

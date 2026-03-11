@@ -376,15 +376,23 @@ a {
   position: relative;
   display: block;
   width: 92%;
+  border-radius: 22px;
+  object-fit: cover;
   height: 320px;
   max-width: 400px;
   margin: 40px auto 0;
   border-radius: 26px;
-  object-fit: cover;
-  object-position: center;
   box-shadow: 0 24px 40px rgba(193, 60, 122, 0.5);
   z-index: 1;
   transition: opacity 0.3s ease;
+}
+
+.hero-image-spacer {
+  display: block;
+  width: 92%;
+  height: 320px;
+  max-width: 400px;
+  margin: 40px auto 0;
 }
 
 .hero-badge {
