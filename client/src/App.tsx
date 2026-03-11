@@ -76,6 +76,9 @@ const pageVariants = {
 function App() {
   const [activePage, setActivePage] = useState<'home' | 'about' | 'product' | 'contact' | 'checkout' | 'account'>('home')
 
+  // ── Mobile menu ───────────────────────────────────────────
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   // ── Admin state ────────────────────────────────────────────
   const [adminToken, setAdminToken] = useState<string | null>(() => localStorage.getItem('keprates_admin_token'))
 
@@ -515,8 +518,66 @@ function App() {
             <span className="icon-cart" />
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
           </button>
+          <button
+            className="hamburger"
+            aria-label="Menu"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <span /><span /><span />
+          </button>
         </motion.div>
       </header>
+
+      {/* ── Mobile Nav Drawer ──────────────────────────── */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              className="mobile-nav-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <motion.div
+              className="mobile-nav-drawer"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="mobile-nav-header">
+                <span className="brand-name" style={{ fontSize: '22px', padding: '6px 14px' }}>Keprates</span>
+                <button className="cart-close" onClick={() => setMobileMenuOpen(false)}>✕</button>
+              </div>
+              <nav className="mobile-nav-links">
+                {(['home', 'about', 'product', 'contact'] as const).map((page) => (
+                  <a
+                    key={page}
+                    href="#"
+                    className={`mobile-nav-link${activePage === page ? ' mobile-nav-link--active' : ''}`}
+                    onClick={(e) => { e.preventDefault(); setActivePage(page); setMobileMenuOpen(false) }}
+                  >
+                    {page.charAt(0).toUpperCase() + page.slice(1)}
+                  </a>
+                ))}
+                <a
+                  href="#"
+                  className={`mobile-nav-link${activePage === 'account' ? ' mobile-nav-link--active' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setMobileMenuOpen(false)
+                    if (isSignedIn) { setActivePage('account') } else { openSignIn() }
+                  }}
+                >
+                  Account
+                </a>
+              </nav>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <div className="rail rail-left">
         <div className="rail-line">
