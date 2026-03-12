@@ -33,7 +33,7 @@ const allowedOrigins = process.env.CLIENT_ORIGIN
 // }))
 
 app.use(cors({
-  origin: ["http://localhost:5173", "https://www.keprates.in"],
+  origin: ["http://localhost:5173", "https://www.keprates.in", "https://keprates.in", "https://api.keprates.in"],
   credentials: true
 }))
 app.use(express.json())
