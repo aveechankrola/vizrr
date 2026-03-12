@@ -57,6 +57,7 @@ export async function fetchProducts(params?: {
 // ── Cart ────────────────────────────────────────────────────────────────────
 
 export async function fetchCart(): Promise<CartResponse> {
+
   const res = await fetch(`${BASE}/cart`)
   const json = await res.json()
   if (!json.success) throw new Error(json.message)

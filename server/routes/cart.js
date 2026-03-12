@@ -9,6 +9,7 @@ let nextItemId = 1
 // GET /api/cart
 router.get('/', async (req, res) => {
   try {
+  
     const enriched = await Promise.all(cart.map(async (item) => {
       const product = await Product.findById(item.productId)
       return { ...item, product }
@@ -17,6 +18,7 @@ router.get('/', async (req, res) => {
     const total = valid.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
     res.json({ success: true, data: valid, total: Number(total.toFixed(2)), count: valid.reduce((s, i) => s + i.quantity, 0) })
   } catch (err) {
+    console.log(err)
     res.status(500).json({ success: false, message: err.message })
   }
 })

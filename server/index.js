@@ -24,14 +24,19 @@ connectDB()
 const allowedOrigins = process.env.CLIENT_ORIGIN
   ? process.env.CLIENT_ORIGIN.split(',').map(o => o.trim())
   : ['http://localhost:5173']
+// app.use(cors({
+//   origin: (origin, callback) => {
+//     if (!origin || allowedOrigins.includes(origin)) return callback(null, true)
+//     callback(null, false)
+//   },
+//   credentials: true
+// }))
+
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true)
-    callback(null, false)
-  },
+  origin: ["http://localhost:5173", "https://www.keprates.in/"],
   credentials: true
-}))
-app.use(clerkMiddleware())
+})) 
+app.use(clerkMiddleware())     
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
