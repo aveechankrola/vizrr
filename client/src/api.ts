@@ -1,4 +1,4 @@
-const BASE = (import.meta.env.DEV ? 'http://localhost:4000' : '') + '/api'
+const BASE = '/api'
 
 export type ProductCategory = 'chocolate-cake' | 'chocolate'
 
