@@ -83,22 +83,6 @@ router.delete('/', (req, res) => {
 
 module.exports = router
 
-// PATCH /api/cart/:itemId  — body: { quantity }
-router.patch('/:itemId', (req, res) => {
-  const item = cart.find((i) => i.id === Number(req.params.itemId))
-  if (!item) {
-    return res.status(404).json({ success: false, message: 'Cart item not found' })
-  }
-
-  const { quantity } = req.body
-  if (!quantity || quantity < 1) {
-    return res.status(400).json({ success: false, message: 'quantity must be >= 1' })
-  }
-
-  item.quantity = Number(quantity)
-  res.json({ success: true, message: 'Cart updated', data: item })
-})
-
 // DELETE /api/cart/:itemId
 router.delete('/:itemId', (req, res) => {
   const index = cart.findIndex((i) => i.id === Number(req.params.itemId))
