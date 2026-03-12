@@ -21,19 +21,8 @@ const PORT = process.env.PORT || 4000
 connectDB()
 
 // ── Middleware ────────────────────────────────────────────────
-const allowedOrigins = process.env.CLIENT_ORIGIN
-  ? process.env.CLIENT_ORIGIN.split(',').map(o => o.trim())
-  : ['http://localhost:5173']
-// app.use(cors({
-//   origin: (origin, callback) => {
-//     if (!origin || allowedOrigins.includes(origin)) return callback(null, true)
-//     callback(null, false)
-//   },
-//   credentials: true
-// }))
-
 app.use(cors({
-  origin: ["http://localhost:5173", "https://www.keprates.in", "https://keprates.in", "https://api.keprates.in"],
+  origin: ["http://localhost:5173", "https://www.keprates.in", "https://keprates.in"],
   credentials: true
 }))
 app.use(express.json())
@@ -52,11 +41,6 @@ app.use('/api/admin', clerkMiddleware(), adminRouter)
 // ── Health check ──────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
   res.json({ success: true, message: 'Keprates API is running', timestamp: new Date().toISOString() })
-})
-
-// ── 404 handler (API-only fallback) ──────────────────────────
-app.use('/api', (_req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' })
 })
 
 // ── Error handler ─────────────────────────────────────────────
