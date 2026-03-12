@@ -50,15 +50,8 @@ app.get('/api/health', (_req, res) => {
   res.json({ success: true, message: 'Keprates API is running', timestamp: new Date().toISOString() })
 })
 
-// ── Serve React client (production) ─────────────────────────
-const clientDist = path.join(__dirname, '../client/dist')
-app.use(express.static(clientDist))
-app.get('/{*splat}', (req, res) => {
-  res.sendFile(path.join(clientDist, 'index.html'))
-})
-
 // ── 404 handler (API-only fallback) ──────────────────────────
-app.use((_req, res) => {
+app.use('/api', (_req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' })
 })
 
@@ -66,6 +59,13 @@ app.use((_req, res) => {
 app.use((err, _req, res, _next) => {
   console.error(err.stack)
   res.status(500).json({ success: false, message: 'Internal server error' })
+})
+
+// ── Serve React client (production) ─────────────────────────
+const clientDist = path.join(__dirname, '../client/dist')
+app.use(express.static(clientDist))
+app.get('/{*splat}', (req, res) => {
+  res.sendFile(path.join(clientDist, 'index.html'))
 })
 
 app.listen(PORT, () => {
