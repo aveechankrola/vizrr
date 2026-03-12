@@ -36,7 +36,6 @@ app.use(cors({
   origin: ["http://localhost:5173", "https://www.keprates.in"],
   credentials: true
 }))
-app.use(clerkMiddleware())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
@@ -44,11 +43,11 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/api/products', productsRouter)
 app.use('/api/cart', cartRouter)
 app.use('/api/contact', contactRouter)
-app.use('/api/orders', ordersRouter)
+app.use('/api/orders', clerkMiddleware(), ordersRouter)
 app.use('/api/auth', authRouter)
-app.use('/api/addresses', addressesRouter)
-app.use('/api/wallet', walletRouter)
-app.use('/api/admin', adminRouter)
+app.use('/api/addresses', clerkMiddleware(), addressesRouter)
+app.use('/api/wallet', clerkMiddleware(), walletRouter)
+app.use('/api/admin', clerkMiddleware(), adminRouter)
 
 // ── Health check ──────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
