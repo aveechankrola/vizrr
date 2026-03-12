@@ -33,10 +33,10 @@ const allowedOrigins = process.env.CLIENT_ORIGIN
 // }))
 
 app.use(cors({
-  origin: ["http://localhost:5173", "https://www.keprates.in/"],
+  origin: ["http://localhost:5173", "https://www.keprates.in"],
   credentials: true
-})) 
-app.use(clerkMiddleware())     
+}))
+app.use(clerkMiddleware())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
