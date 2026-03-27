@@ -119,7 +119,7 @@ function App() {
       setAdminOrders(orders)
       setAdminProducts(products)
       setAdminUsers(users)
-    }).catch(() => {}).finally(() => setAdminLoading(false))
+    }).catch(() => { }).finally(() => setAdminLoading(false))
   }, [adminPageOpen, adminToken, adminTab])
 
   async function handleAdminLogin(e: React.FormEvent) {
@@ -138,7 +138,7 @@ function App() {
   }
 
   async function handleAdminLogout() {
-    if (adminToken) await adminLogout(adminToken).catch(() => {})
+    if (adminToken) await adminLogout(adminToken).catch(() => { })
     localStorage.removeItem('keprates_admin_token')
     setAdminToken(null)
   }
@@ -236,7 +236,7 @@ function App() {
   useEffect(() => {
     if (!isSignedIn) { setSavedAddresses([]); return }
     getToken().then(token => {
-      if (token) fetchAddresses(token).then(setSavedAddresses).catch(() => {})
+      if (token) fetchAddresses(token).then(setSavedAddresses).catch(() => { })
     })
   }, [isSignedIn])
 
@@ -249,7 +249,7 @@ function App() {
         .then(setMyOrders)
         .catch(() => setMyOrders([]))
         .finally(() => setOrdersLoading(false))
-      fetchWallet(token).then(setWallet).catch(() => {})
+      fetchWallet(token).then(setWallet).catch(() => { })
     })
   }, [activePage, isSignedIn])
 
@@ -435,1041 +435,1042 @@ function App() {
 
   return (
     <>
-    <div className="page">
-      <header className="header">
-        <motion.div
-          className="logo"
-          initial={{ opacity: 0, x: -32 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-        >
-          <span className="brand-name">Keprates</span>
-        </motion.div>
-
-        <motion.nav
-          className="nav"
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: 'easeOut', delay: 0.05 }}
-        >
-          <a
-            href="#"
-            className={`nav-link${activePage === 'home' ? ' nav-link--active' : ''}`}
-            onClick={(e) => {
-              e.preventDefault()
-              setActivePage('home')
-            }}
-          >
-            Home
-          </a>
-          <a
-            href="#"
-            className={`nav-link${activePage === 'about' ? ' nav-link--active' : ''}`}
-            onClick={(e) => {
-              e.preventDefault()
-              setActivePage('about')
-            }}
-          >
-            About
-          </a>
-          <a
-            href="#"
-            className={`nav-link${activePage === 'product' ? ' nav-link--active' : ''}`}
-            onClick={(e) => {
-              e.preventDefault()
-              setActivePage('product')
-            }}
-          >
-            Product
-          </a>
-          <a
-            href="#"
-            className={`nav-link${activePage === 'contact' ? ' nav-link--active' : ''}`}
-            onClick={(e) => {
-              e.preventDefault()
-              setActivePage('contact')
-            }}
-          >
-            Contact
-          </a>
-          <a
-            href="#"
-            className={`nav-link${activePage === 'account' ? ' nav-link--active' : ''}`}
-            onClick={(e) => {
-              e.preventDefault()
-              if (isSignedIn) {
-                setActivePage('account')
-              } else {
-                openSignIn()
-              }
-            }}
-          >
-            Account
-          </a>
-        </motion.nav>
-
-        <motion.div
-          className="header-actions"
-          initial={{ opacity: 0, x: 32 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
-        >
-          <button
-            className="icon-button icon-button--cart"
-            aria-label="Cart"
-            onClick={handleOpenCart}
-          >
-            <span className="icon-cart" />
-            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-          </button>
-          <button
-            className="hamburger"
-            aria-label="Menu"
-            onClick={() => setMobileMenuOpen(true)}
-          >
-            <span /><span /><span />
-          </button>
-        </motion.div>
-      </header>
-
-      {/* ── Mobile Nav Drawer ──────────────────────────── */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            <motion.div
-              className="mobile-nav-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              onClick={() => setMobileMenuOpen(false)}
-            />
-            <motion.div
-              className="mobile-nav-drawer"
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="mobile-nav-header">
-                <span className="brand-name" style={{ fontSize: '22px', padding: '6px 14px' }}>Keprates</span>
-                <button className="cart-close" onClick={() => setMobileMenuOpen(false)}>✕</button>
-              </div>
-              <nav className="mobile-nav-links">
-                {(['home', 'about', 'product', 'contact'] as const).map((page) => (
-                  <a
-                    key={page}
-                    href="#"
-                    className={`mobile-nav-link${activePage === page ? ' mobile-nav-link--active' : ''}`}
-                    onClick={(e) => { e.preventDefault(); setActivePage(page); setMobileMenuOpen(false) }}
-                  >
-                    {page.charAt(0).toUpperCase() + page.slice(1)}
-                  </a>
-                ))}
-                <a
-                  href="#"
-                  className={`mobile-nav-link${activePage === 'account' ? ' mobile-nav-link--active' : ''}`}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setMobileMenuOpen(false)
-                    if (isSignedIn) { setActivePage('account') } else { openSignIn() }
-                  }}
-                >
-                  Account
-                </a>
-              </nav>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      <div className="rail rail-left">
-        <div className="rail-line">
-          <span className="rail-line-fill" />
-        </div>
-      </div>
-
-      <div className="rail rail-right">
-        <div className="rail-line">
-          <span className="rail-line-fill" />
-        </div>
-      </div>
-
-      <AnimatePresence mode="wait">
-        {activePage === 'home' && (
+      <div className="page">
+        <header className="header">
           <motion.div
-            key="home"
-            variants={pageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
+            className="logo"
+            initial={{ opacity: 0, x: -32 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
           >
-            <main className="hero">
-            <motion.section
-              className="hero-text"
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
-            >
-              <motion.p className="hero-kicker" variants={fadeInUp}>
-                Every One <span className="hero-kicker-accent">Love&apos;s</span> __
-              </motion.p>
-
-              <motion.h1 className="hero-heading" variants={fadeInUp}>
-                Natural and
-                <br />
-                <span className="hero-highlight">rich Chocolates.</span>
-              </motion.h1>
-
-              <motion.p className="hero-description" variants={fadeInUp}>
-                We provide the finest quality chocolates, crafted fresh with premium
-                ingredients so every bite feels like a celebration.
-              </motion.p>
-
-              <motion.div className="hero-buttons" variants={fadeInUp}>
-                <button className="btn btn-primary" onClick={() => { if (!isSignedIn) { openSignIn() } else { setCartOpen(true) } }}>Order Now</button>
-                <button className="btn btn-outline" onClick={() => setActivePage('product')}>Explore More</button>
-              </motion.div>
-            </motion.section>
-
-            <motion.section
-              className="hero-image-wrapper"
-              initial={{ opacity: 0, x: 80, scale: 0.9 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-            >
-              <div className="hero-card">
-                <div className="hero-image-circle" />
-                <AnimatePresence mode="sync">
-                  <motion.img
-                    key={heroSlideIndex}
-                    src={heroImages[heroSlideIndex]}
-                    alt="Indulgent chocolate"
-                    className="hero-image"
-                    initial={{ opacity: 0, scale: 1.06 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.96 }}
-                    transition={{ duration: 0.7, ease: 'easeInOut' }}
-                    style={{ position: 'absolute', top: 0, left: '4%' }}
-                  />
-                </AnimatePresence>
-                {/* spacer to keep card height */}
-                <div className="hero-image-spacer" />
-
-                <motion.div
-                  className="hero-badge"
-                  initial={{ opacity: 0, y: -16, rotate: -6 }}
-                  animate={{ opacity: 1, y: 0, rotate: 0 }}
-                  transition={{ duration: 0.5, delay: 0.25 }}
-                >
-                  <div className="hero-badge-inner">
-                    <span className="hero-badge-small">WE CARE ABOUT</span>
-                    <span className="hero-badge-main">YOUR CHOCOLATE!</span>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  className="hero-rating"
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.35 }}
-                >
-                  <span className="hero-rating-label">Rich Chocolates</span>
-                  <div className="hero-stars">
-                    <span>★</span>
-                    <span>★</span>
-                    <span>★</span>
-                    <span>★</span>
-                    <span className="hero-star-dim">★</span>
-                  </div>
-                  <span className="hero-rating-score">4.5</span>
-                </motion.div>
-              </div>
-            </motion.section>
-            </main>
+            <span className="brand-name">Keprates</span>
           </motion.div>
-        )}
 
-        {activePage === 'product' && (
-          <motion.div
-            key="product"
-            variants={pageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
+          <motion.nav
+            className="nav"
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: 'easeOut', delay: 0.05 }}
           >
-            <main className="product-page">
-          <section className="product-header">
-            <div>
-              <p className="product-kicker">Keprates Collection</p>
-              <h2 className="product-heading">Chocolates you&apos;ll love.</h2>
-              <p className="product-subtitle">
-                Choose from our indulgent chocolates and chocolate cakes, then sort by price or pick
-                from our specials on sale.
-              </p>
-            </div>
-            <div className="product-filters">
-              <div className="filter-group">
-                <button
-                  type="button"
-                  className={`filter-pill${filter === 'all' ? ' filter-pill--active' : ''}`}
-                  onClick={() => setFilter('all')}
-                >
-                  All
-                </button>
-                <button
-                  type="button"
-                  className={`filter-pill${filter === 'cakes' ? ' filter-pill--active' : ''}`}
-                  onClick={() => setFilter('cakes')}
-                >
-                  Chocolate Cakes
-                </button>
-                <button
-                  type="button"
-                  className={`filter-pill${filter === 'chocolates' ? ' filter-pill--active' : ''}`}
-                  onClick={() => setFilter('chocolates')}
-                >
-                  Chocolates
-                </button>
-                <button
-                  type="button"
-                  className={`filter-pill${filter === 'sale' ? ' filter-pill--active' : ''}`}
-                  onClick={() => setFilter('sale')}
-                >
-                  On sale
-                </button>
-              </div>
-              <label className="sort-select">
-                <span>Sort by</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) =>
-                    setSortBy(e.target.value as 'featured' | 'priceLow' | 'priceHigh')
-                  }
-                >
-                  <option value="featured">Featured</option>
-                  <option value="priceLow">Price: Low to High</option>
-                  <option value="priceHigh">Price: High to Low</option>
-                </select>
-              </label>
-            </div>
-          </section>
+            <a
+              href="#"
+              className={`nav-link${activePage === 'home' ? ' nav-link--active' : ''}`}
+              onClick={(e) => {
+                e.preventDefault()
+                setActivePage('home')
+              }}
+            >
+              Home
+            </a>
+            <a
+              href="#"
+              className={`nav-link${activePage === 'about' ? ' nav-link--active' : ''}`}
+              onClick={(e) => {
+                e.preventDefault()
+                setActivePage('about')
+              }}
+            >
+              About
+            </a>
+            <a
+              href="#"
+              className={`nav-link${activePage === 'product' ? ' nav-link--active' : ''}`}
+              onClick={(e) => {
+                e.preventDefault()
+                setActivePage('product')
+              }}
+            >
+              Product
+            </a>
+            <a
+              href="#"
+              className={`nav-link${activePage === 'contact' ? ' nav-link--active' : ''}`}
+              onClick={(e) => {
+                e.preventDefault()
+                setActivePage('contact')
+              }}
+            >
+              Contact
+            </a>
+            <a
+              href="#"
+              className={`nav-link${activePage === 'account' ? ' nav-link--active' : ''}`}
+              onClick={(e) => {
+                e.preventDefault()
+                if (isSignedIn) {
+                  setActivePage('account')
+                } else {
+                  openSignIn()
+                }
+              }}
+            >
+              Account
+            </a>
+          </motion.nav>
 
-          <section className="product-grid">
-            {productsLoading && (
-              <p className="products-status">Loading products…</p>
-            )}
-            {productsError && (
-              <p className="products-status products-status--error">⚠ {productsError}</p>
-            )}
-            <AnimatePresence mode="popLayout">
-            {!productsLoading && products.map((product) => (
-              <motion.article
-                key={product.id}
-                layout
-                className="product-card"
-                initial={{ opacity: 0, scale: 0.92, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.88, y: 10 }}
+          <motion.div
+            className="header-actions"
+            initial={{ opacity: 0, x: 32 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
+          >
+            <button
+              className="icon-button icon-button--cart"
+              aria-label="Cart"
+              onClick={handleOpenCart}
+            >
+              <span className="icon-cart" />
+              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+            </button>
+            <button
+              className="hamburger"
+              aria-label="Menu"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <span /><span /><span />
+            </button>
+          </motion.div>
+        </header>
+
+        {/* ── Mobile Nav Drawer ──────────────────────────── */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <>
+              <motion.div
+                className="mobile-nav-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                onClick={() => setMobileMenuOpen(false)}
+              />
+              <motion.div
+                className="mobile-nav-drawer"
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={{ y: -6, boxShadow: '0 22px 38px rgba(193, 82, 132, 0.35)' }}
               >
-                <div className="product-media">
-                  <div className={`product-image-circle product-image-circle--${product.category}`} />
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="product-image"
-                  />
-                  {product.onSale && <span className="product-sale-badge">On sale</span>}
+                <div className="mobile-nav-header">
+                  <span className="brand-name" style={{ fontSize: '22px', padding: '6px 14px' }}>Keprates</span>
+                  <button className="cart-close" onClick={() => setMobileMenuOpen(false)}>✕</button>
                 </div>
-                <div className="product-body">
-                  <div className="product-tag-row">
-                    <span className="product-tag">
-                      {product.category === 'chocolate-cake' ? 'Chocolate Cake' : 'Chocolate'}
-                    </span>
-                    <span className="product-rating">★ {product.rating}</span>
-                  </div>
-                  <h3 className="product-name">{product.name}</h3>
-                  <div className="product-price-row">
-                    <span className="product-price">₹{product.price.toFixed(2)}</span>
-                    {product.originalPrice && (
-                      <span className="product-price-old">
-                        ₹{product.originalPrice.toFixed(2)}
-                      </span>
-                    )}
-                  </div>
-                  <div className="product-meta">
-                    <span>Fresh · Same-day delivery</span>
-                    <button
-                      type="button"
-                      className="btn btn-primary product-cta"
-                      disabled={addingId === product.id}
-                      onClick={() => handleAddToCart(product.id)}
+                <nav className="mobile-nav-links">
+                  {(['home', 'about', 'product', 'contact'] as const).map((page) => (
+                    <a
+                      key={page}
+                      href="#"
+                      className={`mobile-nav-link${activePage === page ? ' mobile-nav-link--active' : ''}`}
+                      onClick={(e) => { e.preventDefault(); setActivePage(page); setMobileMenuOpen(false) }}
                     >
-                      {addingId === product.id ? 'Adding…' : 'Add to cart'}
-                    </button>
-                  </div>
-                </div>
-              </motion.article>
-            ))}
-            </AnimatePresence>
-          </section>
-            </main>
-          </motion.div>
-        )}
+                      {page.charAt(0).toUpperCase() + page.slice(1)}
+                    </a>
+                  ))}
+                  <a
+                    href="#"
+                    className={`mobile-nav-link${activePage === 'account' ? ' mobile-nav-link--active' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setMobileMenuOpen(false)
+                      if (isSignedIn) { setActivePage('account') } else { openSignIn() }
+                    }}
+                  >
+                    Account
+                  </a>
+                </nav>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
-        {activePage === 'about' && (
-          <motion.div
-            key="about"
-            variants={pageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            <main className="about-page">
-              <section className="about-hero">
-                <div className="about-text">
-                  <p className="about-kicker">About Keprates</p>
-                  <h2 className="about-heading">
-                    Freshly prepared treats
-                    <br />
-                    from the heart of Shimla.
-                  </h2>
-                  <p className="about-body">
-                    Keprates is a Shimla-based cake and chocolate studio, handcrafting small-batch
-                    cakes, desserts and chocolates that are baked and tempered fresh every single
-                    day.
-                  </p>
-                  <p className="about-body">
-                    From hillside mornings to late-night celebrations, our focus is simple: warm
-                    service, clean ingredients and flavours that feel like home.
-                  </p>
-                  <div className="about-stats">
-                    <div className="about-stat">
-                      <span className="about-stat-number">10+</span>
-                      <span className="about-stat-label">Signature cakes</span>
-                    </div>
-                    <div className="about-stat">
-                      <span className="about-stat-number">15+</span>
-                      <span className="about-stat-label">Artisan chocolates</span>
-                    </div>
-                    <div className="about-stat">
-                      <span className="about-stat-number">365</span>
-                      <span className="about-stat-label">Fresh prep days</span>
-                    </div>
-                  </div>
-                </div>
+        <div className="rail rail-left">
+          <div className="rail-line">
+            <span className="rail-line-fill" />
+          </div>
+        </div>
 
-                <div className="about-card">
-                  <div className="about-card-ring" />
-                  <div className="about-card-inner">
-                    <h3>Why people choose us</h3>
-                    <ul>
-                      <li>Freshly baked and tempered on the same day</li>
-                      <li>Seasonal flavours inspired by Shimla&apos;s orchards</li>
-                      <li>Custom cakes and gifting boxes for every occasion</li>
-                    </ul>
-                    <button type="button" className="btn btn-primary about-cta">
-                      Talk to our kitchen
-                    </button>
-                  </div>
-                </div>
-              </section>
-            </main>
-          </motion.div>
-        )}
-        {activePage === 'contact' && (
-          <motion.div
-            key="contact"
-            variants={pageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            <main className="contact-page">
-              <section className="contact-hero">
-                <motion.div
-                  className="contact-text"
+        <div className="rail rail-right">
+          <div className="rail-line">
+            <span className="rail-line-fill" />
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait">
+          {activePage === 'home' && (
+            <motion.div
+              key="home"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <main className="hero">
+                <motion.section
+                  className="hero-text"
                   variants={staggerContainer}
                   initial="hidden"
                   animate="visible"
                 >
-                  <motion.p className="contact-kicker" variants={fadeInUp}>Get in touch</motion.p>
-                  <motion.h2 className="contact-heading" variants={fadeInUp}>
-                    We'd love to hear<br />
-                    <span className="contact-heading-accent">from you.</span>
-                  </motion.h2>
-                  <motion.p className="contact-body" variants={fadeInUp}>
-                    Whether you need a custom cake, a gifting box or just want to say hello — our
-                    kitchen is always happy to chat.
+                  <motion.p className="hero-kicker" variants={fadeInUp}>
+                    Every One <span className="hero-kicker-accent">Love&apos;s</span> __
                   </motion.p>
 
-                  <motion.div className="contact-info-cards" variants={fadeInUp}>
-                    <div className="contact-info-card">
-                      <span className="contact-info-icon">📍</span>
-                      <div>
-                        <p className="contact-info-label">Visit us</p>
-                        <p className="contact-info-value">Mall Road, Shimla, HP 171001</p>
-                      </div>
-                    </div>
-                    <div className="contact-info-card">
-                      <span className="contact-info-icon">📞</span>
-                      <div>
-                        <p className="contact-info-label">Call us</p>
-                        <p className="contact-info-value">+91 98765 43210</p>
-                      </div>
-                    </div>
-                    <div className="contact-info-card">
-                      <span className="contact-info-icon">✉️</span>
-                      <div>
-                        <p className="contact-info-label">Email us</p>
-                        <p className="contact-info-value">hello@keprates.com</p>
-                      </div>
-                    </div>
+                  <motion.h1 className="hero-heading" variants={fadeInUp}>
+                    Natural and
+                    <br />
+                    <span className="hero-highlight">rich Chocolates.</span>
+                  </motion.h1>
+
+                  <motion.p className="hero-description" variants={fadeInUp}>
+                    We provide the finest quality chocolates, crafted fresh with premium
+                    ingredients so every bite feels like a celebration.
+                  </motion.p>
+
+                  <motion.div className="hero-buttons" variants={fadeInUp}>
+                    <button className="btn btn-primary" onClick={() => { if (!isSignedIn) { openSignIn() } else { setCartOpen(true) } }}>Order Now</button>
+                    <button className="btn btn-outline" onClick={() => setActivePage('product')}>Explore More</button>
                   </motion.div>
-                </motion.div>
+                </motion.section>
 
-                <motion.div
-                  className="contact-form-card"
-                  initial={{ opacity: 0, x: 60, scale: 0.96 }}
+                <motion.section
+                  className="hero-image-wrapper"
+                  initial={{ opacity: 0, x: 80, scale: 0.9 }}
                   animate={{ opacity: 1, x: 0, scale: 1 }}
-                  transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
                 >
-                  <h3 className="contact-form-title">Send us a message</h3>
-                  {contactStatus === 'success' && (
+                  <div className="hero-card">
+                    <div className="hero-image-circle" />
+                    <AnimatePresence mode="sync">
+                      <motion.img
+                        key={heroSlideIndex}
+                        src={heroImages[heroSlideIndex]}
+                        alt="Indulgent chocolate"
+                        className="hero-image"
+                        initial={{ opacity: 0, scale: 1.06 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.96 }}
+                        transition={{ duration: 0.7, ease: 'easeInOut' }}
+                        style={{ position: 'absolute', top: 0, left: '4%' }}
+                      />
+                    </AnimatePresence>
+                    {/* spacer to keep card height */}
+                    <div className="hero-image-spacer" />
+
                     <motion.div
-                      className="contact-success"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      className="hero-badge"
+                      initial={{ opacity: 0, y: -16, rotate: -6 }}
+                      animate={{ opacity: 1, y: 0, rotate: 0 }}
+                      transition={{ duration: 0.5, delay: 0.25 }}
                     >
-                      ✅ {contactMsg}
+                      <div className="hero-badge-inner">
+                        <span className="hero-badge-small">WE CARE ABOUT</span>
+                        <span className="hero-badge-main">YOUR CHOCOLATE!</span>
+                      </div>
                     </motion.div>
-                  )}
-                  {contactStatus === 'error' && (
+
                     <motion.div
-                      className="contact-error"
-                      initial={{ opacity: 0, y: 10 }}
+                      className="hero-rating"
+                      initial={{ opacity: 0, y: 24 }}
                       animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.35 }}
                     >
-                      ⚠ {contactMsg}
+                      <span className="hero-rating-label">Rich Chocolates</span>
+                      <div className="hero-stars">
+                        <span>★</span>
+                        <span>★</span>
+                        <span>★</span>
+                        <span>★</span>
+                        <span className="hero-star-dim">★</span>
+                      </div>
+                      <span className="hero-rating-score">4.5</span>
                     </motion.div>
-                  )}
-                  <form className="contact-form" onSubmit={handleContactSubmit}>
-                    <div className="contact-form-row">
-                      <div className="contact-field">
-                        <label className="contact-label">First name</label>
-                        <input className="contact-input" type="text" name="firstName" placeholder="Rahul" value={contactForm.firstName} onChange={handleContactChange} required />
-                      </div>
-                      <div className="contact-field">
-                        <label className="contact-label">Last name</label>
-                        <input className="contact-input" type="text" name="lastName" placeholder="Doe" value={contactForm.lastName} onChange={handleContactChange} required />
-                      </div>
-                    </div>
-                    <div className="contact-field">
-                      <label className="contact-label">Email</label>
-                      <input className="contact-input" type="email" name="email" placeholder="rahul@example.com" value={contactForm.email} onChange={handleContactChange} required />
-                    </div>
-                    <div className="contact-field">
-                      <label className="contact-label">Subject</label>
-                      <input className="contact-input" type="text" name="subject" placeholder="Custom birthday cake" value={contactForm.subject} onChange={handleContactChange} required />
-                    </div>
-                    <div className="contact-field">
-                      <label className="contact-label">Message</label>
-                      <textarea className="contact-input contact-textarea" name="message" placeholder="Tell us what you have in mind…" rows={4} value={contactForm.message} onChange={handleContactChange} required />
-                    </div>
-                    <button type="submit" className="btn btn-primary contact-submit" disabled={contactStatus === 'loading'}>
-                      {contactStatus === 'loading' ? 'Sending…' : 'Send Message'}
-                    </button>
-                  </form>
-                </motion.div>
-              </section>
-            </main>
-          </motion.div>
-        )}
-
-        {/* ── Account Page ──────────────────────────────────── */}
-        {activePage === 'account' && isSignedIn && user && (
-          <motion.div
-            key="account"
-            variants={pageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            <main className="account-page page-content">
-              <div className="account-grid">
-
-                {/* Left — profile card */}
-                <aside className="account-sidebar">
-                  <div className="account-avatar-lg">
-                    {(user.firstName ?? '?')[0]}{(user.lastName ?? '?')[0]}
                   </div>
-                  <h2 className="account-display-name">{user.firstName} {user.lastName}</h2>
-                  <p className="account-email">{user.emailAddresses[0]?.emailAddress}</p>
-                  <div className="account-info-list">
-                    <div className="account-info-row">
-                      <span className="account-info-label">Member since</span>
-                      <span className="account-info-value">
-                        {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
-                      </span>
-                    </div>
-                    <div className="account-info-row">
-                      <span className="account-info-label">Total orders</span>
-                      <span className="account-info-value">{myOrders.length}</span>
-                    </div>
+                </motion.section>
+              </main>
+            </motion.div>
+          )}
+
+          {activePage === 'product' && (
+            <motion.div
+              key="product"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <main className="product-page">
+                <section className="product-header">
+                  <div>
+                    <p className="product-kicker">Keprates Collection</p>
+                    <h2 className="product-heading">Chocolates you&apos;ll love.</h2>
+                    <p className="product-subtitle">
+                      Choose from our indulgent chocolates and chocolate cakes, then sort by price or pick
+                      from our specials on sale.
+                    </p>
                   </div>
-                  <button className="btn account-logout-btn" onClick={handleLogout}>
-                    Sign Out
-                  </button>
-                </aside>
-
-                {/* Right — tabbed content */}
-                <section className="account-orders">
-                  {/* Tab nav */}
-                  <div className="account-tabs">
-                    <button className={`account-tab-btn${accountTab === 'orders' ? ' account-tab-btn--active' : ''}`} onClick={() => setAccountTab('orders')}>My Orders</button>
-                    <button className={`account-tab-btn${accountTab === 'addresses' ? ' account-tab-btn--active' : ''}`} onClick={() => setAccountTab('addresses')}>Saved Addresses</button>
-                    <button className={`account-tab-btn${accountTab === 'wallet' ? ' account-tab-btn--active' : ''}`} onClick={() => setAccountTab('wallet')}>Wallet</button>
+                  <div className="product-filters">
+                    <div className="filter-group">
+                      <button
+                        type="button"
+                        className={`filter-pill${filter === 'all' ? ' filter-pill--active' : ''}`}
+                        onClick={() => setFilter('all')}
+                      >
+                        All
+                      </button>
+                      <button
+                        type="button"
+                        className={`filter-pill${filter === 'cakes' ? ' filter-pill--active' : ''}`}
+                        onClick={() => setFilter('cakes')}
+                      >
+                        Chocolate Cakes
+                      </button>
+                      <button
+                        type="button"
+                        className={`filter-pill${filter === 'chocolates' ? ' filter-pill--active' : ''}`}
+                        onClick={() => setFilter('chocolates')}
+                      >
+                        Chocolates
+                      </button>
+                      <button
+                        type="button"
+                        className={`filter-pill${filter === 'sale' ? ' filter-pill--active' : ''}`}
+                        onClick={() => setFilter('sale')}
+                      >
+                        On sale
+                      </button>
+                    </div>
+                    <label className="sort-select">
+                      <span>Sort by</span>
+                      <select
+                        value={sortBy}
+                        onChange={(e) =>
+                          setSortBy(e.target.value as 'featured' | 'priceLow' | 'priceHigh')
+                        }
+                      >
+                        <option value="featured">Featured</option>
+                        <option value="priceLow">Price: Low to High</option>
+                        <option value="priceHigh">Price: High to Low</option>
+                      </select>
+                    </label>
                   </div>
-
-                  {/* ── My Orders tab ───────────────────── */}
-                  {accountTab === 'orders' && (
-                    <>
-                      {ordersLoading ? (
-                        <p className="account-empty">Loading orders…</p>
-                      ) : myOrders.length === 0 ? (
-                        <div className="account-empty-box">
-                          <span className="account-empty-icon">🛍️</span>
-                          <p>No orders yet.</p>
-                          <button className="btn btn-primary" onClick={() => setActivePage('product')}>
-                            Shop Now
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="account-order-list">
-                          {[...myOrders].reverse().map((order) => (
-                            <div key={order.id} className="account-order-card">
-                              <div className="account-order-header">
-                                <div>
-                                  <p className="account-order-id">{order.id}</p>
-                                  <p className="account-order-date">
-                                    {new Date(order.placedAt).toLocaleDateString('en-IN', {
-                                      day: 'numeric', month: 'short', year: 'numeric',
-                                    })}
-                                  </p>
-                                </div>
-                                <div className="account-order-meta">
-                                  <span className={`account-order-status account-order-status--${order.status}`}>
-                                    {order.status}
-                                  </span>
-                                  <span className="account-order-total">₹{order.total.toFixed(2)}</span>
-                                </div>
-                              </div>
-                              <ul className="account-order-items">
-                                {order.items.map((item, i) => (
-                                  <li key={i} className="account-order-item">
-                                    <span className="account-order-item-name">{item.name}</span>
-                                    <span className="account-order-item-qty">×{item.quantity}</span>
-                                    <span className="account-order-item-price">₹{item.lineTotal.toFixed(2)}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                              <div className="account-order-footer">
-                                <span>Delivery: {order.deliveryFee === 0 ? <span className="checkout-free">Free</span> : `₹${order.deliveryFee}`}</span>
-                                <span>Payment: <strong>{order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online'}</strong></span>
-                                {(order.status === 'confirmed' || order.status === 'pending') && (
-                                  <button
-                                    className="order-cancel-btn"
-                                    onClick={() => handleCancelOrder(order.id)}
-                                  >
-                                    Cancel Order
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {/* ── Saved Addresses tab ─────────────── */}
-                  {accountTab === 'addresses' && (
-                    <div className="account-addresses">
-                      {savedAddresses.length === 0 && !addAddrOpen && (
-                        <div className="account-empty-box">
-                          <span className="account-empty-icon">📍</span>
-                          <p>No saved addresses yet.</p>
-                        </div>
-                      )}
-                      <div className="address-card-list">
-                        {savedAddresses.map((addr) => (
-                          <div key={addr.id} className="address-card">
-                            <div className="address-card-top">
-                              <span className="address-card-label">{addr.label}</span>
-                              <button className="address-card-delete" onClick={() => handleDeleteAddress(addr.id)} title="Remove">✕</button>
-                            </div>
-                            <p className="address-card-line">{addr.firstName} {addr.lastName}{addr.phone ? ` · ${addr.phone}` : ''}</p>
-                            <p className="address-card-line">{addr.address}</p>
-                            <p className="address-card-line">{addr.city} — {addr.pincode}</p>
-                          </div>
-                        ))}
-                      </div>
-
-                      {addAddrOpen ? (
-                        <form className="add-address-form" onSubmit={handleAddAddress}>
-                          <h4 className="add-address-title">New Address</h4>
-                          {addAddrError && (
-                            <div className="contact-error">⚠ {addAddrError}</div>
-                          )}
-                          <div className="contact-form-row">
-                            <div className="contact-field">
-                              <label className="contact-label">Label</label>
-                              <input className="contact-input" placeholder="Home / Office" value={addAddrForm.label} onChange={e => setAddAddrForm(p => ({ ...p, label: e.target.value }))} />
-                            </div>
-                            <div className="contact-field">
-                              <label className="contact-label">Phone</label>
-                              <input className="contact-input" type="tel" placeholder="+91 98765 43210" value={addAddrForm.phone} onChange={e => setAddAddrForm(p => ({ ...p, phone: e.target.value }))} />
-                            </div>
-                          </div>
-                          <div className="contact-form-row">
-                            <div className="contact-field">
-                              <label className="contact-label">First name</label>
-                              <input className="contact-input" placeholder="Rahul" value={addAddrForm.firstName} onChange={e => setAddAddrForm(p => ({ ...p, firstName: e.target.value }))} />
-                            </div>
-                            <div className="contact-field">
-                              <label className="contact-label">Last name</label>
-                              <input className="contact-input" placeholder="Doe" value={addAddrForm.lastName} onChange={e => setAddAddrForm(p => ({ ...p, lastName: e.target.value }))} />
-                            </div>
-                          </div>
-                          <div className="contact-field">
-                            <label className="contact-label">Street Address</label>
-                            <input className="contact-input" placeholder="House no., Street, Landmark" value={addAddrForm.address} onChange={e => setAddAddrForm(p => ({ ...p, address: e.target.value }))} required />
-                          </div>
-                          <div className="contact-form-row">
-                            <div className="contact-field">
-                              <label className="contact-label">City</label>
-                              <input className="contact-input" placeholder="Shimla" value={addAddrForm.city} onChange={e => setAddAddrForm(p => ({ ...p, city: e.target.value }))} required />
-                            </div>
-                            <div className="contact-field">
-                              <label className="contact-label">Pincode</label>
-                              <input className="contact-input" placeholder="171001" value={addAddrForm.pincode} onChange={e => setAddAddrForm(p => ({ ...p, pincode: e.target.value }))} required />
-                            </div>
-                          </div>
-                          <div className="add-address-actions">
-                            <button type="button" className="btn account-logout-btn" onClick={() => setAddAddrOpen(false)}>Cancel</button>
-                            <button type="submit" className="btn btn-primary" disabled={addAddrLoading}>{addAddrLoading ? 'Saving…' : 'Save Address'}</button>
-                          </div>
-                        </form>
-                      ) : (
-                        <button className="btn btn-primary add-address-btn" onClick={() => { setAddAddrOpen(true); setAddAddrError('') }}>+ Add New Address</button>
-                      )}
-                    </div>
-                  )}
-
-                  {/* ── Wallet tab ──────────────────────── */}
-                  {accountTab === 'wallet' && (
-                    <div className="account-wallet">
-                      <div className="wallet-balance-card">
-                        <p className="wallet-balance-label">Available Balance</p>
-                        <p className="wallet-balance-amount">₹{wallet.balance.toFixed(2)}</p>
-                        <p className="wallet-balance-note">Earn 5% cashback on every order 🎂</p>
-                      </div>
-                      <h4 className="wallet-history-title">Transaction History</h4>
-                      {wallet.transactions.length === 0 ? (
-                        <div className="account-empty-box">
-                          <span className="account-empty-icon">💳</span>
-                          <p>No transactions yet. Place an order to earn cashback!</p>
-                        </div>
-                      ) : (
-                        <div className="wallet-transactions">
-                          {[...wallet.transactions].reverse().map((tx) => (
-                            <div key={tx.id} className="wallet-tx">
-                              <div className="wallet-tx-info">
-                                <p className="wallet-tx-desc">{tx.description}</p>
-                                <p className="wallet-tx-date">{new Date(tx.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-                              </div>
-                              <span className="wallet-tx-amount">+₹{tx.amount.toFixed(2)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </section>
 
-              </div>
-            </main>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Checkout Page ───────────────────────────────────── */}
-      <AnimatePresence>
-        {activePage === 'checkout' && (
-          <motion.div
-            key="checkout-overlay"
-            className="checkout-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <motion.div
-              className="checkout-panel"
-              initial={{ y: 60, opacity: 0, scale: 0.97 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: 40, opacity: 0, scale: 0.97 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {checkoutStatus === 'success' && orderResult ? (
-                /* ── Success screen ────────── */
-                <motion.div className="checkout-success" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                  <div className="checkout-success-icon">🎉</div>
-                  <h2>Order Confirmed!</h2>
-                  <p className="checkout-success-id">Order ID: <strong>{orderResult.orderId}</strong></p>
-                  <p className="checkout-success-sub">Estimated delivery: <strong>{orderResult.estimatedDelivery}</strong></p>
-                  <p className="checkout-success-total">Total paid: <strong>₹{orderResult.total.toFixed(2)}</strong></p>
-                  <button className="btn btn-primary" onClick={() => { setActivePage('home'); setCheckoutForm({ firstName:'',lastName:'',email:'',phone:'',address:'',city:'',pincode:'' }) }}>
-                    Back to Home
-                  </button>
-                </motion.div>
-              ) : (
-                /* ── Checkout form ────────── */
-                <div className="checkout-layout">
-                  {/* Left — Order summary */}
-                  <div className="checkout-summary">
-                    <div className="checkout-summary-header">
-                      <button className="checkout-back" onClick={() => { setCartOpen(true); setActivePage('home') }}>← Back to cart</button>
-                      <h2 className="checkout-heading">Order Summary</h2>
-                    </div>
-                    <ul className="checkout-item-list">
-                      {cartItems.map((item) => (
-                        <li key={item.id} className="checkout-item">
-                          <img src={item.product.image} alt={item.product.name} className="checkout-item-img" />
-                          <div className="checkout-item-info">
-                            <p className="checkout-item-name">{item.product.name}</p>
-                            <p className="checkout-item-qty">Qty: {item.quantity}</p>
+                <section className="product-grid">
+                  {productsLoading && (
+                    <p className="products-status">Loading products…</p>
+                  )}
+                  {productsError && (
+                    <p className="products-status products-status--error">⚠ {productsError}</p>
+                  )}
+                  <AnimatePresence mode="popLayout">
+                    {!productsLoading && products.map((product) => (
+                      <motion.article
+                        key={product.id}
+                        layout
+                        className="product-card"
+                        initial={{ opacity: 0, scale: 0.92, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.88, y: 10 }}
+                        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                        whileHover={{ y: -6, boxShadow: '0 22px 38px rgba(193, 82, 132, 0.35)' }}
+                      >
+                        <div className="product-media">
+                          <div className={`product-image-circle product-image-circle--${product.category}`} />
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="product-image"
+                            loading="lazy"
+                          />
+                          {product.onSale && <span className="product-sale-badge">On sale</span>}
+                        </div>
+                        <div className="product-body">
+                          <div className="product-tag-row">
+                            <span className="product-tag">
+                              {product.category === 'chocolate-cake' ? 'Chocolate Cake' : 'Chocolate'}
+                            </span>
+                            <span className="product-rating">★ {product.rating}</span>
                           </div>
-                          <p className="checkout-item-price">₹{(item.product.price * item.quantity).toFixed(2)}</p>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="checkout-totals">
-                      <div className="checkout-total-row">
-                        <span>Subtotal</span>
-                        <span>₹{cartTotal.toFixed(2)}</span>
+                          <h3 className="product-name">{product.name}</h3>
+                          <div className="product-price-row">
+                            <span className="product-price">₹{product.price.toFixed(2)}</span>
+                            {product.originalPrice && (
+                              <span className="product-price-old">
+                                ₹{product.originalPrice.toFixed(2)}
+                              </span>
+                            )}
+                          </div>
+                          <div className="product-meta">
+                            <span>Fresh · Same-day delivery</span>
+                            <button
+                              type="button"
+                              className="btn btn-primary product-cta"
+                              disabled={addingId === product.id}
+                              onClick={() => handleAddToCart(product.id)}
+                            >
+                              {addingId === product.id ? 'Adding…' : 'Add to cart'}
+                            </button>
+                          </div>
+                        </div>
+                      </motion.article>
+                    ))}
+                  </AnimatePresence>
+                </section>
+              </main>
+            </motion.div>
+          )}
+
+          {activePage === 'about' && (
+            <motion.div
+              key="about"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <main className="about-page">
+                <section className="about-hero">
+                  <div className="about-text">
+                    <p className="about-kicker">About Keprates</p>
+                    <h2 className="about-heading">
+                      Freshly prepared treats
+                      <br />
+                      from the heart of Shimla.
+                    </h2>
+                    <p className="about-body">
+                      Keprates is a Shimla-based cake and chocolate studio, handcrafting small-batch
+                      cakes, desserts and chocolates that are baked and tempered fresh every single
+                      day.
+                    </p>
+                    <p className="about-body">
+                      From hillside mornings to late-night celebrations, our focus is simple: warm
+                      service, clean ingredients and flavours that feel like home.
+                    </p>
+                    <div className="about-stats">
+                      <div className="about-stat">
+                        <span className="about-stat-number">10+</span>
+                        <span className="about-stat-label">Signature cakes</span>
                       </div>
-                      <div className="checkout-total-row">
-                        <span>Delivery</span>
-                        <span>{cartTotal >= 50 ? <span className="checkout-free">Free</span> : '₹5.00'}</span>
+                      <div className="about-stat">
+                        <span className="about-stat-number">15+</span>
+                        <span className="about-stat-label">Artisan chocolates</span>
                       </div>
-                      <div className="checkout-total-row checkout-total-row--final">
-                        <span>Total</span>
-                        <span>₹{(cartTotal >= 50 ? cartTotal : cartTotal + 5).toFixed(2)}</span>
+                      <div className="about-stat">
+                        <span className="about-stat-number">365</span>
+                        <span className="about-stat-label">Fresh prep days</span>
                       </div>
                     </div>
-                    {cartTotal < 50 && (
-                      <p className="checkout-free-tip">🚚 Add ₹{(50 - cartTotal).toFixed(2)} more for free delivery!</p>
-                    )}
                   </div>
 
-                  {/* Right — Delivery form */}
-                  <div className="checkout-form-wrap">
-                    <h2 className="checkout-heading">Delivery Details</h2>
-                    {checkoutStatus === 'error' && (
-                      <div className="contact-error">⚠ {checkoutError}</div>
-                    )}
-                    {/* Saved address quick-fill */}
-                    {isSignedIn && savedAddresses.length > 0 && (
-                      <div className="checkout-saved-addresses">
-                        <p className="checkout-saved-label">Use a saved address</p>
-                        <div className="checkout-address-pills">
-                          {savedAddresses.map((addr) => (
-                            <button
-                              key={addr.id}
-                              type="button"
-                              className="checkout-address-pill"
-                              onClick={() =>
-                                setCheckoutForm((prev) => ({
-                                  ...prev,
-                                  firstName: addr.firstName || prev.firstName,
-                                  lastName: addr.lastName || prev.lastName,
-                                  phone: addr.phone || prev.phone,
-                                  address: addr.address,
-                                  city: addr.city,
-                                  pincode: addr.pincode,
-                                }))
-                              }
-                            >
-                              📍 {addr.label} — {addr.city}
-                            </button>
-                          ))}
+                  <div className="about-card">
+                    <div className="about-card-ring" />
+                    <div className="about-card-inner">
+                      <h3>Why people choose us</h3>
+                      <ul>
+                        <li>Freshly baked and tempered on the same day</li>
+                        <li>Seasonal flavours inspired by Shimla&apos;s orchards</li>
+                        <li>Custom cakes and gifting boxes for every occasion</li>
+                      </ul>
+                      <button type="button" className="btn btn-primary about-cta">
+                        Talk to our kitchen
+                      </button>
+                    </div>
+                  </div>
+                </section>
+              </main>
+            </motion.div>
+          )}
+          {activePage === 'contact' && (
+            <motion.div
+              key="contact"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <main className="contact-page">
+                <section className="contact-hero">
+                  <motion.div
+                    className="contact-text"
+                    variants={staggerContainer}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    <motion.p className="contact-kicker" variants={fadeInUp}>Get in touch</motion.p>
+                    <motion.h2 className="contact-heading" variants={fadeInUp}>
+                      We'd love to hear<br />
+                      <span className="contact-heading-accent">from you.</span>
+                    </motion.h2>
+                    <motion.p className="contact-body" variants={fadeInUp}>
+                      Whether you need a custom cake, a gifting box or just want to say hello — our
+                      kitchen is always happy to chat.
+                    </motion.p>
+
+                    <motion.div className="contact-info-cards" variants={fadeInUp}>
+                      <div className="contact-info-card">
+                        <span className="contact-info-icon">📍</span>
+                        <div>
+                          <p className="contact-info-label">Visit us</p>
+                          <p className="contact-info-value">Mall Road, Shimla, HP 171001</p>
                         </div>
                       </div>
+                      <div className="contact-info-card">
+                        <span className="contact-info-icon">📞</span>
+                        <div>
+                          <p className="contact-info-label">Call us</p>
+                          <p className="contact-info-value">+91 98765 43210</p>
+                        </div>
+                      </div>
+                      <div className="contact-info-card">
+                        <span className="contact-info-icon">✉️</span>
+                        <div>
+                          <p className="contact-info-label">Email us</p>
+                          <p className="contact-info-value">hello@keprates.com</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+
+                  <motion.div
+                    className="contact-form-card"
+                    initial={{ opacity: 0, x: 60, scale: 0.96 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <h3 className="contact-form-title">Send us a message</h3>
+                    {contactStatus === 'success' && (
+                      <motion.div
+                        className="contact-success"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
+                        ✅ {contactMsg}
+                      </motion.div>
                     )}
-                    <form className="checkout-form" onSubmit={handlePlaceOrder}>
+                    {contactStatus === 'error' && (
+                      <motion.div
+                        className="contact-error"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
+                        ⚠ {contactMsg}
+                      </motion.div>
+                    )}
+                    <form className="contact-form" onSubmit={handleContactSubmit}>
                       <div className="contact-form-row">
                         <div className="contact-field">
                           <label className="contact-label">First name</label>
-                          <input className="contact-input" name="firstName" placeholder="Rahul" value={checkoutForm.firstName} onChange={handleCheckoutChange} required />
+                          <input className="contact-input" type="text" name="firstName" placeholder="Rahul" value={contactForm.firstName} onChange={handleContactChange} required />
                         </div>
                         <div className="contact-field">
                           <label className="contact-label">Last name</label>
-                          <input className="contact-input" name="lastName" placeholder="Doe" value={checkoutForm.lastName} onChange={handleCheckoutChange} required />
-                        </div>
-                      </div>
-                      <div className="contact-form-row">
-                        <div className="contact-field">
-                          <label className="contact-label">Email</label>
-                          <input className="contact-input" name="email" type="email" placeholder="rahul@example.com" value={checkoutForm.email} onChange={handleCheckoutChange} required />
-                        </div>
-                        <div className="contact-field">
-                          <label className="contact-label">Phone</label>
-                          <input className="contact-input" name="phone" type="tel" placeholder="+91 98765 43210" value={checkoutForm.phone} onChange={handleCheckoutChange} required />
+                          <input className="contact-input" type="text" name="lastName" placeholder="Doe" value={contactForm.lastName} onChange={handleContactChange} required />
                         </div>
                       </div>
                       <div className="contact-field">
-                        <label className="contact-label">Address</label>
-                        <input className="contact-input" name="address" placeholder="House no., Street, Landmark" value={checkoutForm.address} onChange={handleCheckoutChange} required />
+                        <label className="contact-label">Email</label>
+                        <input className="contact-input" type="email" name="email" placeholder="rahul@example.com" value={contactForm.email} onChange={handleContactChange} required />
                       </div>
-                      <div className="contact-form-row">
-                        <div className="contact-field">
-                          <label className="contact-label">City</label>
-                          <input className="contact-input" name="city" placeholder="Shimla" value={checkoutForm.city} onChange={handleCheckoutChange} required />
-                        </div>
-                        <div className="contact-field">
-                          <label className="contact-label">Pincode</label>
-                          <input className="contact-input" name="pincode" placeholder="171001" value={checkoutForm.pincode} onChange={handleCheckoutChange} required />
-                        </div>
+                      <div className="contact-field">
+                        <label className="contact-label">Subject</label>
+                        <input className="contact-input" type="text" name="subject" placeholder="Custom birthday cake" value={contactForm.subject} onChange={handleContactChange} required />
                       </div>
-
-                      {/* Payment method */}
-                      <div className="checkout-payment">
-                        <p className="contact-label">Payment Method</p>
-                        <div className="checkout-payment-options">
-                          <label className={`checkout-payment-opt${paymentMethod === 'cod' ? ' checkout-payment-opt--active' : ''}`}>
-                            <input type="radio" name="payment" value="cod" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} />
-                            💵 Cash on Delivery
-                          </label>
-                          <label className={`checkout-payment-opt${paymentMethod === 'online' ? ' checkout-payment-opt--active' : ''}`}>
-                            <input type="radio" name="payment" value="online" checked={paymentMethod === 'online'} onChange={() => setPaymentMethod('online')} />
-                            📱 Online Payment
-                          </label>
-                        </div>
+                      <div className="contact-field">
+                        <label className="contact-label">Message</label>
+                        <textarea className="contact-input contact-textarea" name="message" placeholder="Tell us what you have in mind…" rows={4} value={contactForm.message} onChange={handleContactChange} required />
                       </div>
-
-                      <button type="submit" className="btn btn-primary checkout-submit" disabled={checkoutStatus === 'loading'}>
-                        {checkoutStatus === 'loading' ? 'Placing order…' : `Place Order • ₹${(cartTotal >= 50 ? cartTotal : cartTotal + 5).toFixed(2)}`}
+                      <button type="submit" className="btn btn-primary contact-submit" disabled={contactStatus === 'loading'}>
+                        {contactStatus === 'loading' ? 'Sending…' : 'Send Message'}
                       </button>
                     </form>
-                  </div>
-                </div>
-              )}
+                  </motion.div>
+                </section>
+              </main>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
 
-      {/* ── Cart Drawer ────────────────────────────────────── */}
-      <AnimatePresence>
-        {cartOpen && (
-          <>
+          {/* ── Account Page ──────────────────────────────────── */}
+          {activePage === 'account' && isSignedIn && user && (
             <motion.div
-              className="cart-backdrop"
+              key="account"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <main className="account-page page-content">
+                <div className="account-grid">
+
+                  {/* Left — profile card */}
+                  <aside className="account-sidebar">
+                    <div className="account-avatar-lg">
+                      {(user.firstName ?? '?')[0]}{(user.lastName ?? '?')[0]}
+                    </div>
+                    <h2 className="account-display-name">{user.firstName} {user.lastName}</h2>
+                    <p className="account-email">{user.emailAddresses[0]?.emailAddress}</p>
+                    <div className="account-info-list">
+                      <div className="account-info-row">
+                        <span className="account-info-label">Member since</span>
+                        <span className="account-info-value">
+                          {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
+                        </span>
+                      </div>
+                      <div className="account-info-row">
+                        <span className="account-info-label">Total orders</span>
+                        <span className="account-info-value">{myOrders.length}</span>
+                      </div>
+                    </div>
+                    <button className="btn account-logout-btn" onClick={handleLogout}>
+                      Sign Out
+                    </button>
+                  </aside>
+
+                  {/* Right — tabbed content */}
+                  <section className="account-orders">
+                    {/* Tab nav */}
+                    <div className="account-tabs">
+                      <button className={`account-tab-btn${accountTab === 'orders' ? ' account-tab-btn--active' : ''}`} onClick={() => setAccountTab('orders')}>My Orders</button>
+                      <button className={`account-tab-btn${accountTab === 'addresses' ? ' account-tab-btn--active' : ''}`} onClick={() => setAccountTab('addresses')}>Saved Addresses</button>
+                      <button className={`account-tab-btn${accountTab === 'wallet' ? ' account-tab-btn--active' : ''}`} onClick={() => setAccountTab('wallet')}>Wallet</button>
+                    </div>
+
+                    {/* ── My Orders tab ───────────────────── */}
+                    {accountTab === 'orders' && (
+                      <>
+                        {ordersLoading ? (
+                          <p className="account-empty">Loading orders…</p>
+                        ) : myOrders.length === 0 ? (
+                          <div className="account-empty-box">
+                            <span className="account-empty-icon">🛍️</span>
+                            <p>No orders yet.</p>
+                            <button className="btn btn-primary" onClick={() => setActivePage('product')}>
+                              Shop Now
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="account-order-list">
+                            {[...myOrders].reverse().map((order) => (
+                              <div key={order.id} className="account-order-card">
+                                <div className="account-order-header">
+                                  <div>
+                                    <p className="account-order-id">{order.id}</p>
+                                    <p className="account-order-date">
+                                      {new Date(order.placedAt).toLocaleDateString('en-IN', {
+                                        day: 'numeric', month: 'short', year: 'numeric',
+                                      })}
+                                    </p>
+                                  </div>
+                                  <div className="account-order-meta">
+                                    <span className={`account-order-status account-order-status--${order.status}`}>
+                                      {order.status}
+                                    </span>
+                                    <span className="account-order-total">₹{order.total.toFixed(2)}</span>
+                                  </div>
+                                </div>
+                                <ul className="account-order-items">
+                                  {order.items.map((item, i) => (
+                                    <li key={i} className="account-order-item">
+                                      <span className="account-order-item-name">{item.name}</span>
+                                      <span className="account-order-item-qty">×{item.quantity}</span>
+                                      <span className="account-order-item-price">₹{item.lineTotal.toFixed(2)}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                                <div className="account-order-footer">
+                                  <span>Delivery: {order.deliveryFee === 0 ? <span className="checkout-free">Free</span> : `₹${order.deliveryFee}`}</span>
+                                  <span>Payment: <strong>{order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online'}</strong></span>
+                                  {(order.status === 'confirmed' || order.status === 'pending') && (
+                                    <button
+                                      className="order-cancel-btn"
+                                      onClick={() => handleCancelOrder(order.id)}
+                                    >
+                                      Cancel Order
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* ── Saved Addresses tab ─────────────── */}
+                    {accountTab === 'addresses' && (
+                      <div className="account-addresses">
+                        {savedAddresses.length === 0 && !addAddrOpen && (
+                          <div className="account-empty-box">
+                            <span className="account-empty-icon">📍</span>
+                            <p>No saved addresses yet.</p>
+                          </div>
+                        )}
+                        <div className="address-card-list">
+                          {savedAddresses.map((addr) => (
+                            <div key={addr.id} className="address-card">
+                              <div className="address-card-top">
+                                <span className="address-card-label">{addr.label}</span>
+                                <button className="address-card-delete" onClick={() => handleDeleteAddress(addr.id)} title="Remove">✕</button>
+                              </div>
+                              <p className="address-card-line">{addr.firstName} {addr.lastName}{addr.phone ? ` · ${addr.phone}` : ''}</p>
+                              <p className="address-card-line">{addr.address}</p>
+                              <p className="address-card-line">{addr.city} — {addr.pincode}</p>
+                            </div>
+                          ))}
+                        </div>
+
+                        {addAddrOpen ? (
+                          <form className="add-address-form" onSubmit={handleAddAddress}>
+                            <h4 className="add-address-title">New Address</h4>
+                            {addAddrError && (
+                              <div className="contact-error">⚠ {addAddrError}</div>
+                            )}
+                            <div className="contact-form-row">
+                              <div className="contact-field">
+                                <label className="contact-label">Label</label>
+                                <input className="contact-input" placeholder="Home / Office" value={addAddrForm.label} onChange={e => setAddAddrForm(p => ({ ...p, label: e.target.value }))} />
+                              </div>
+                              <div className="contact-field">
+                                <label className="contact-label">Phone</label>
+                                <input className="contact-input" type="tel" placeholder="+91 98765 43210" value={addAddrForm.phone} onChange={e => setAddAddrForm(p => ({ ...p, phone: e.target.value }))} />
+                              </div>
+                            </div>
+                            <div className="contact-form-row">
+                              <div className="contact-field">
+                                <label className="contact-label">First name</label>
+                                <input className="contact-input" placeholder="Rahul" value={addAddrForm.firstName} onChange={e => setAddAddrForm(p => ({ ...p, firstName: e.target.value }))} />
+                              </div>
+                              <div className="contact-field">
+                                <label className="contact-label">Last name</label>
+                                <input className="contact-input" placeholder="Doe" value={addAddrForm.lastName} onChange={e => setAddAddrForm(p => ({ ...p, lastName: e.target.value }))} />
+                              </div>
+                            </div>
+                            <div className="contact-field">
+                              <label className="contact-label">Street Address</label>
+                              <input className="contact-input" placeholder="House no., Street, Landmark" value={addAddrForm.address} onChange={e => setAddAddrForm(p => ({ ...p, address: e.target.value }))} required />
+                            </div>
+                            <div className="contact-form-row">
+                              <div className="contact-field">
+                                <label className="contact-label">City</label>
+                                <input className="contact-input" placeholder="Shimla" value={addAddrForm.city} onChange={e => setAddAddrForm(p => ({ ...p, city: e.target.value }))} required />
+                              </div>
+                              <div className="contact-field">
+                                <label className="contact-label">Pincode</label>
+                                <input className="contact-input" placeholder="171001" value={addAddrForm.pincode} onChange={e => setAddAddrForm(p => ({ ...p, pincode: e.target.value }))} required />
+                              </div>
+                            </div>
+                            <div className="add-address-actions">
+                              <button type="button" className="btn account-logout-btn" onClick={() => setAddAddrOpen(false)}>Cancel</button>
+                              <button type="submit" className="btn btn-primary" disabled={addAddrLoading}>{addAddrLoading ? 'Saving…' : 'Save Address'}</button>
+                            </div>
+                          </form>
+                        ) : (
+                          <button className="btn btn-primary add-address-btn" onClick={() => { setAddAddrOpen(true); setAddAddrError('') }}>+ Add New Address</button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* ── Wallet tab ──────────────────────── */}
+                    {accountTab === 'wallet' && (
+                      <div className="account-wallet">
+                        <div className="wallet-balance-card">
+                          <p className="wallet-balance-label">Available Balance</p>
+                          <p className="wallet-balance-amount">₹{wallet.balance.toFixed(2)}</p>
+                          <p className="wallet-balance-note">Earn 5% cashback on every order 🎂</p>
+                        </div>
+                        <h4 className="wallet-history-title">Transaction History</h4>
+                        {wallet.transactions.length === 0 ? (
+                          <div className="account-empty-box">
+                            <span className="account-empty-icon">💳</span>
+                            <p>No transactions yet. Place an order to earn cashback!</p>
+                          </div>
+                        ) : (
+                          <div className="wallet-transactions">
+                            {[...wallet.transactions].reverse().map((tx) => (
+                              <div key={tx.id} className="wallet-tx">
+                                <div className="wallet-tx-info">
+                                  <p className="wallet-tx-desc">{tx.description}</p>
+                                  <p className="wallet-tx-date">{new Date(tx.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                </div>
+                                <span className="wallet-tx-amount">+₹{tx.amount.toFixed(2)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </section>
+
+                </div>
+              </main>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Checkout Page ───────────────────────────────────── */}
+        <AnimatePresence>
+          {activePage === 'checkout' && (
+            <motion.div
+              key="checkout-overlay"
+              className="checkout-overlay"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              onClick={() => setCartOpen(false)}
-            />
-            <motion.aside
-              className="cart-drawer"
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.3 }}
             >
-              {/* Header */}
-              <div className="cart-drawer-header">
-                <div className="cart-drawer-title">
-                  <h2>Your Cart</h2>
-                  {cartCount > 0 && <span className="cart-drawer-count">{cartCount}</span>}
-                </div>
-                <button className="cart-close" onClick={() => setCartOpen(false)} aria-label="Close cart">✕</button>
-              </div>
-
-              {/* Body */}
-              <div className="cart-drawer-body">
-                {cartLoading ? (
-                  <div className="cart-empty"><p>Loading your cart…</p></div>
-                ) : cartItems.length === 0 ? (
-                  <div className="cart-empty">
-                    <span className="cart-empty-icon">🍰</span>
-                    <p>Your cart is empty.</p>
-                    <button className="btn btn-outline" onClick={() => { setCartOpen(false); setActivePage('product') }}>Browse Products</button>
-                  </div>
+              <motion.div
+                className="checkout-panel"
+                initial={{ y: 60, opacity: 0, scale: 0.97 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: 40, opacity: 0, scale: 0.97 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {checkoutStatus === 'success' && orderResult ? (
+                  /* ── Success screen ────────── */
+                  <motion.div className="checkout-success" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                    <div className="checkout-success-icon">🎉</div>
+                    <h2>Order Confirmed!</h2>
+                    <p className="checkout-success-id">Order ID: <strong>{orderResult.orderId}</strong></p>
+                    <p className="checkout-success-sub">Estimated delivery: <strong>{orderResult.estimatedDelivery}</strong></p>
+                    <p className="checkout-success-total">Total paid: <strong>₹{orderResult.total.toFixed(2)}</strong></p>
+                    <button className="btn btn-primary" onClick={() => { setActivePage('home'); setCheckoutForm({ firstName: '', lastName: '', email: '', phone: '', address: '', city: '', pincode: '' }) }}>
+                      Back to Home
+                    </button>
+                  </motion.div>
                 ) : (
-                  <ul className="cart-list">
-                    {cartItems.map((item) => (
-                      <li key={item.id} className={`cart-item${removingId === item.id ? ' cart-item--removing' : ''}`}>
-                        <img src={item.product.image} alt={item.product.name} className="cart-item-img" />
-                        <div className="cart-item-info">
-                          <p className="cart-item-name">{item.product.name}</p>
-                          <p className="cart-item-cat">{item.product.category === 'chocolate-cake' ? 'Chocolate Cake' : 'Chocolate'}</p>
-                          <p className="cart-item-price">₹{(item.product.price * item.quantity).toFixed(2)}</p>
+                  /* ── Checkout form ────────── */
+                  <div className="checkout-layout">
+                    {/* Left — Order summary */}
+                    <div className="checkout-summary">
+                      <div className="checkout-summary-header">
+                        <button className="checkout-back" onClick={() => { setCartOpen(true); setActivePage('home') }}>← Back to cart</button>
+                        <h2 className="checkout-heading">Order Summary</h2>
+                      </div>
+                      <ul className="checkout-item-list">
+                        {cartItems.map((item) => (
+                          <li key={item.id} className="checkout-item">
+                            <img src={item.product.image} alt={item.product.name} className="checkout-item-img" />
+                            <div className="checkout-item-info">
+                              <p className="checkout-item-name">{item.product.name}</p>
+                              <p className="checkout-item-qty">Qty: {item.quantity}</p>
+                            </div>
+                            <p className="checkout-item-price">₹{(item.product.price * item.quantity).toFixed(2)}</p>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="checkout-totals">
+                        <div className="checkout-total-row">
+                          <span>Subtotal</span>
+                          <span>₹{cartTotal.toFixed(2)}</span>
                         </div>
-                        <div className="cart-item-controls">
-                          <div className="cart-qty">
-                            <button className="cart-qty-btn" onClick={() => handleQtyChange(item.id, item.quantity - 1)} disabled={item.quantity <= 1}>−</button>
-                            <span className="cart-qty-val">{item.quantity}</span>
-                            <button className="cart-qty-btn" onClick={() => handleQtyChange(item.id, item.quantity + 1)}>+</button>
-                          </div>
-                          <button
-                            className="cart-remove"
-                            onClick={() => handleRemoveItem(item.id)}
-                            aria-label="Remove"
-                            disabled={removingId === item.id}
-                          >
-                            🗑
-                          </button>
+                        <div className="checkout-total-row">
+                          <span>Delivery</span>
+                          <span>{cartTotal >= 50 ? <span className="checkout-free">Free</span> : '₹5.00'}</span>
                         </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+                        <div className="checkout-total-row checkout-total-row--final">
+                          <span>Total</span>
+                          <span>₹{(cartTotal >= 50 ? cartTotal : cartTotal + 5).toFixed(2)}</span>
+                        </div>
+                      </div>
+                      {cartTotal < 50 && (
+                        <p className="checkout-free-tip">🚚 Add ₹{(50 - cartTotal).toFixed(2)} more for free delivery!</p>
+                      )}
+                    </div>
 
-              {/* Footer */}
-              {cartItems.length > 0 && (
-                <div className="cart-drawer-footer">
-                  <div className="cart-subtotal">
-                    <span>Subtotal</span>
-                    <span className="cart-subtotal-val">₹{cartTotal.toFixed(2)}</span>
+                    {/* Right — Delivery form */}
+                    <div className="checkout-form-wrap">
+                      <h2 className="checkout-heading">Delivery Details</h2>
+                      {checkoutStatus === 'error' && (
+                        <div className="contact-error">⚠ {checkoutError}</div>
+                      )}
+                      {/* Saved address quick-fill */}
+                      {isSignedIn && savedAddresses.length > 0 && (
+                        <div className="checkout-saved-addresses">
+                          <p className="checkout-saved-label">Use a saved address</p>
+                          <div className="checkout-address-pills">
+                            {savedAddresses.map((addr) => (
+                              <button
+                                key={addr.id}
+                                type="button"
+                                className="checkout-address-pill"
+                                onClick={() =>
+                                  setCheckoutForm((prev) => ({
+                                    ...prev,
+                                    firstName: addr.firstName || prev.firstName,
+                                    lastName: addr.lastName || prev.lastName,
+                                    phone: addr.phone || prev.phone,
+                                    address: addr.address,
+                                    city: addr.city,
+                                    pincode: addr.pincode,
+                                  }))
+                                }
+                              >
+                                📍 {addr.label} — {addr.city}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <form className="checkout-form" onSubmit={handlePlaceOrder}>
+                        <div className="contact-form-row">
+                          <div className="contact-field">
+                            <label className="contact-label">First name</label>
+                            <input className="contact-input" name="firstName" placeholder="Rahul" value={checkoutForm.firstName} onChange={handleCheckoutChange} required />
+                          </div>
+                          <div className="contact-field">
+                            <label className="contact-label">Last name</label>
+                            <input className="contact-input" name="lastName" placeholder="Doe" value={checkoutForm.lastName} onChange={handleCheckoutChange} required />
+                          </div>
+                        </div>
+                        <div className="contact-form-row">
+                          <div className="contact-field">
+                            <label className="contact-label">Email</label>
+                            <input className="contact-input" name="email" type="email" placeholder="rahul@example.com" value={checkoutForm.email} onChange={handleCheckoutChange} required />
+                          </div>
+                          <div className="contact-field">
+                            <label className="contact-label">Phone</label>
+                            <input className="contact-input" name="phone" type="tel" placeholder="+91 98765 43210" value={checkoutForm.phone} onChange={handleCheckoutChange} required />
+                          </div>
+                        </div>
+                        <div className="contact-field">
+                          <label className="contact-label">Address</label>
+                          <input className="contact-input" name="address" placeholder="House no., Street, Landmark" value={checkoutForm.address} onChange={handleCheckoutChange} required />
+                        </div>
+                        <div className="contact-form-row">
+                          <div className="contact-field">
+                            <label className="contact-label">City</label>
+                            <input className="contact-input" name="city" placeholder="Shimla" value={checkoutForm.city} onChange={handleCheckoutChange} required />
+                          </div>
+                          <div className="contact-field">
+                            <label className="contact-label">Pincode</label>
+                            <input className="contact-input" name="pincode" placeholder="171001" value={checkoutForm.pincode} onChange={handleCheckoutChange} required />
+                          </div>
+                        </div>
+
+                        {/* Payment method */}
+                        <div className="checkout-payment">
+                          <p className="contact-label">Payment Method</p>
+                          <div className="checkout-payment-options">
+                            <label className={`checkout-payment-opt${paymentMethod === 'cod' ? ' checkout-payment-opt--active' : ''}`}>
+                              <input type="radio" name="payment" value="cod" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} />
+                              💵 Cash on Delivery
+                            </label>
+                            <label className={`checkout-payment-opt${paymentMethod === 'online' ? ' checkout-payment-opt--active' : ''}`}>
+                              <input type="radio" name="payment" value="online" checked={paymentMethod === 'online'} onChange={() => setPaymentMethod('online')} />
+                              📱 Online Payment
+                            </label>
+                          </div>
+                        </div>
+
+                        <button type="submit" className="btn btn-primary checkout-submit" disabled={checkoutStatus === 'loading'}>
+                          {checkoutStatus === 'loading' ? 'Placing order…' : `Place Order • ₹${(cartTotal >= 50 ? cartTotal : cartTotal + 5).toFixed(2)}`}
+                        </button>
+                      </form>
+                    </div>
                   </div>
-                  <button
-                    className="btn btn-primary cart-checkout"
-                    onClick={() => {
-                      if (!isSignedIn) {
-                        setPendingCheckout(true)
-                        openSignIn()
-                      } else {
-                        setCartOpen(false)
-                        setActivePage('checkout')
-                        setCheckoutStatus('idle')
-                        setOrderResult(null)
-                      }
-                    }}
-                  >Proceed to Checkout</button>
-                  <button className="cart-clear" onClick={handleClearCart}>Clear cart</button>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Cart Drawer ────────────────────────────────────── */}
+        <AnimatePresence>
+          {cartOpen && (
+            <>
+              <motion.div
+                className="cart-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                onClick={() => setCartOpen(false)}
+              />
+              <motion.aside
+                className="cart-drawer"
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {/* Header */}
+                <div className="cart-drawer-header">
+                  <div className="cart-drawer-title">
+                    <h2>Your Cart</h2>
+                    {cartCount > 0 && <span className="cart-drawer-count">{cartCount}</span>}
+                  </div>
+                  <button className="cart-close" onClick={() => setCartOpen(false)} aria-label="Close cart">✕</button>
                 </div>
-              )}
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
-    </div>
+
+                {/* Body */}
+                <div className="cart-drawer-body">
+                  {cartLoading ? (
+                    <div className="cart-empty"><p>Loading your cart…</p></div>
+                  ) : cartItems.length === 0 ? (
+                    <div className="cart-empty">
+                      <span className="cart-empty-icon">🍰</span>
+                      <p>Your cart is empty.</p>
+                      <button className="btn btn-outline" onClick={() => { setCartOpen(false); setActivePage('product') }}>Browse Products</button>
+                    </div>
+                  ) : (
+                    <ul className="cart-list">
+                      {cartItems.map((item) => (
+                        <li key={item.id} className={`cart-item${removingId === item.id ? ' cart-item--removing' : ''}`}>
+                          <img src={item.product.image} alt={item.product.name} className="cart-item-img" />
+                          <div className="cart-item-info">
+                            <p className="cart-item-name">{item.product.name}</p>
+                            <p className="cart-item-cat">{item.product.category === 'chocolate-cake' ? 'Chocolate Cake' : 'Chocolate'}</p>
+                            <p className="cart-item-price">₹{(item.product.price * item.quantity).toFixed(2)}</p>
+                          </div>
+                          <div className="cart-item-controls">
+                            <div className="cart-qty">
+                              <button className="cart-qty-btn" onClick={() => handleQtyChange(item.id, item.quantity - 1)} disabled={item.quantity <= 1}>−</button>
+                              <span className="cart-qty-val">{item.quantity}</span>
+                              <button className="cart-qty-btn" onClick={() => handleQtyChange(item.id, item.quantity + 1)}>+</button>
+                            </div>
+                            <button
+                              className="cart-remove"
+                              onClick={() => handleRemoveItem(item.id)}
+                              aria-label="Remove"
+                              disabled={removingId === item.id}
+                            >
+                              🗑
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Footer */}
+                {cartItems.length > 0 && (
+                  <div className="cart-drawer-footer">
+                    <div className="cart-subtotal">
+                      <span>Subtotal</span>
+                      <span className="cart-subtotal-val">₹{cartTotal.toFixed(2)}</span>
+                    </div>
+                    <button
+                      className="btn btn-primary cart-checkout"
+                      onClick={() => {
+                        if (!isSignedIn) {
+                          setPendingCheckout(true)
+                          openSignIn()
+                        } else {
+                          setCartOpen(false)
+                          setActivePage('checkout')
+                          setCheckoutStatus('idle')
+                          setOrderResult(null)
+                        }
+                      }}
+                    >Proceed to Checkout</button>
+                    <button className="cart-clear" onClick={handleClearCart}>Clear cart</button>
+                  </div>
+                )}
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* ── Admin Panel ────────────────────────────────────── */}
       <AnimatePresence>
