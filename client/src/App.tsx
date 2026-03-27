@@ -290,18 +290,6 @@ function App() {
     }
   }
 
-  // ── Address handlers ────────────────────────────────────────
-  async function refreshSavedAddresses() {
-    try {
-      const token = await getToken()
-      if (!token) return
-      const addrs = await fetchAddresses(token)
-      setSavedAddresses(addrs)
-    } catch (err) {
-      console.error('Failed to load addresses:', err)
-    }
-  }
-
   async function handleDeleteAddress(id: number) {
     const token = await getToken()
     if (!token) return
@@ -1081,7 +1069,7 @@ function App() {
                     {/* ── Saved Addresses tab ─────────────── */}
                     {accountTab === 'addresses' && (
                       <div className="account-addresses">
-                        {savedAddresses.length === 0 && !addAddrOpen && (
+                        {savedAddresses.length === 0 && (
                           <div className="account-empty-box">
                             <span className="account-empty-icon">📍</span>
                             <p>No saved addresses yet.</p>
