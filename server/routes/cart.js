@@ -82,23 +82,6 @@ router.delete('/', (req, res) => {
 })
 
 module.exports = router
+res.json({ success: true, message: 'Cart cleared' })
 
-// DELETE /api/cart/:itemId
-router.delete('/:itemId', (req, res) => {
-  const index = cart.findIndex((i) => i.id === Number(req.params.itemId))
-  if (index === -1) {
-    return res.status(404).json({ success: false, message: 'Cart item not found' })
-  }
 
-  cart.splice(index, 1)
-  const count = cart.reduce((s, i) => s + i.quantity, 0)
-  res.json({ success: true, message: 'Item removed', count })
-})
-
-// DELETE /api/cart  — clear entire cart
-router.delete('/', (req, res) => {
-  cart = []
-  res.json({ success: true, message: 'Cart cleared' })
-})
-
-module.exports = router

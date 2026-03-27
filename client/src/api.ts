@@ -1,4 +1,4 @@
-const BASE = '/api'
+const BASE = 'https://api.keprates.in/api'
 
 export type ProductCategory = 'chocolate-cake' | 'chocolate'
 

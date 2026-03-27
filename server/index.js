@@ -49,12 +49,9 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ success: false, message: 'Internal server error' })
 })
 
-// ── Serve React client (production) ─────────────────────────
-const clientDist = path.join(__dirname, '../client/dist')
-app.use(express.static(clientDist))
-
+// ── 404 handler ───────────────────────────────────────────────
 app.use((req, res) => {
-  res.sendFile(path.join(clientDist, 'index.html'))
+  res.status(404).json({ success: false, message: 'Route not found' })
 })
 
 app.listen(PORT, () => {
