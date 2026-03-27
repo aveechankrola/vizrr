@@ -5,8 +5,6 @@ const Product = require('../models/Product')
 const Order = require('../models/Order')
 const Wallet = require('../models/Wallet')
 
-let nextOrderId = 1000
-
 // POST /api/orders
 router.post('/', async (req, res) => {
   try {
@@ -42,8 +40,16 @@ router.post('/', async (req, res) => {
     const deliveryFee = subtotal >= 50 ? 0 : 5
     const total = Number((subtotal + deliveryFee).toFixed(2))
 
+    // Get next order ID dynamically from database
+    const lastOrder = await Order.findOne().sort({ _id: -1 })
+    let nextId = 1000
+    if (lastOrder?.orderId) {
+      const lastNum = parseInt(lastOrder.orderId.replace('KPR-', ''))
+      if (!isNaN(lastNum)) nextId = lastNum + 1
+    }
+
     const order = await Order.create({
-      orderId: `KPR-${nextOrderId++}`,
+      orderId: `KPR-${nextId}`,
       userId,
       customer,
       items: enrichedItems,
