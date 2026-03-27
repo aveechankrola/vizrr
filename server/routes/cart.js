@@ -82,6 +82,4 @@ router.delete('/', (req, res) => {
 })
 
 module.exports = router
-res.json({ success: true, message: 'Cart cleared' })
-
 
