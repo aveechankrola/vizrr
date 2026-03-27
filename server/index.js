@@ -28,11 +28,7 @@ app.use(cors({
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-// ── Routes ────────────────────────────────────────────────────app.use((req, res, next) => {
-if (req.path.startsWith('/api')) {
-  console.log(`[API] ${req.method} ${req.path}`)
-}
-next()
+// ── Routes ────────────────────────────────────────────────────
 app.use('/api/products', productsRouter)
 app.use('/api/cart', cartRouter)
 app.use('/api/contact', contactRouter)
