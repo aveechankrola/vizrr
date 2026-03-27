@@ -13,6 +13,7 @@ const authRouter = require('./routes/auth')
 const addressesRouter = require('./routes/addresses')
 const walletRouter = require('./routes/wallet')
 const adminRouter = require('./routes/admin')
+const paymentRouter = require('./routes/payment')
 
 const app = express()
 const PORT = process.env.PORT || 4000
@@ -37,6 +38,7 @@ app.use('/api/auth', authRouter)
 app.use('/api/addresses', clerkMiddleware(), addressesRouter)
 app.use('/api/wallet', clerkMiddleware(), walletRouter)
 app.use('/api/admin', clerkMiddleware(), adminRouter)
+app.use('/api/payment', paymentRouter)
 
 // ── Health check ──────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

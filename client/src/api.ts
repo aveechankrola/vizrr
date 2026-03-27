@@ -295,6 +295,36 @@ export async function fetchWallet(token: string): Promise<WalletData> {
   return json.data
 }
 
+// ── Payment (Instamojo) ─────────────────────────────────────────────────────
+
+export type PaymentLinkResponse = {
+  paymentUrl: string
+  paymentId: string
+}
+
+export async function createPaymentLink(
+  orderId: string,
+  amount: number,
+  customerName: string,
+  customerEmail: string,
+  customerPhone: string,
+): Promise<PaymentLinkResponse> {
+  const res = await fetch(`${BASE}/payment/create-link`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      orderId,
+      amount,
+      customerName,
+      customerEmail,
+      customerPhone,
+    }),
+  })
+  const json = await res.json()
+  if (!json.success) throw new Error(json.message)
+  return json.data
+}
+
 // ── Admin ──────────────────────────────────────────────────────────────────
 
 export type AdminStats = {

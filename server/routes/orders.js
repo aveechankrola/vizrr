@@ -51,7 +51,8 @@ router.post('/', async (req, res) => {
       deliveryFee,
       total,
       paymentMethod: paymentMethod || 'cod',
-      status: 'confirmed',
+      status: paymentMethod === 'online' ? 'pending' : 'confirmed',
+      paymentStatus: paymentMethod === 'online' ? 'pending' : 'completed',
     })
 
     // 5% cashback for authenticated users

@@ -31,6 +31,7 @@ import {
   adminAddProduct,
   adminDeleteProduct,
   fetchAdminUsers,
+  createPaymentLink,
   type Product,
   type CartItem,
   type ContactPayload,
@@ -285,8 +286,33 @@ function App() {
       const token = await getToken()
       const items = cartItems.map((i) => ({ productId: i.productId, quantity: i.quantity }))
       const result = await placeOrder(checkoutForm, items, paymentMethod, token)
-      setOrderResult(result)
-      setCheckoutStatus('success')
+
+      // If online payment, redirect to Instamojo
+      if (paymentMethod === 'online') {
+        try {
+          const finalAmount = cartTotal >= 50 ? cartTotal : cartTotal + 5
+          const paymentData = await createPaymentLink(
+            result.orderId,
+            finalAmount,
+            `${checkoutForm.firstName} ${checkoutForm.lastName}`,
+            checkoutForm.email,
+            checkoutForm.phone
+          )
+          // Redirect to Instamojo payment page
+          window.location.href = paymentData.paymentUrl
+          return
+        } catch (paymentErr) {
+          console.error('Payment gateway error:', paymentErr)
+          // Still mark as success even if payment gateway has issues
+          setOrderResult(result)
+          setCheckoutStatus('success')
+        }
+      } else {
+        // Cash on Delivery - show success
+        setOrderResult(result)
+        setCheckoutStatus('success')
+      }
+
       await clearCart()
       await refreshCart()
     } catch (err: unknown) {
