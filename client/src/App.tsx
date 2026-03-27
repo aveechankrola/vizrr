@@ -19,6 +19,7 @@ import {
   fetchMyOrders,
   cancelOrder,
   fetchAddresses,
+  addAddress,
   deleteAddress,
   fetchWallet,
   adminLogin,
@@ -223,6 +224,10 @@ function App() {
 
   // Saved addresses
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([])
+  const [addAddrOpen, setAddAddrOpen] = useState(false)
+  const [addAddrForm, setAddAddrForm] = useState({ label: 'Home', firstName: '', lastName: '', phone: '', address: '', city: '', pincode: '', lat: 0, lng: 0 })
+  const [addAddrLoading, setAddAddrLoading] = useState(false)
+  const [addAddrError, setAddAddrError] = useState('')
 
   // Wallet
   const [wallet, setWallet] = useState<WalletData>({ balance: 0, transactions: [] })
