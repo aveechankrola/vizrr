@@ -118,6 +118,10 @@ router.post('/webhook', async (req, res) => {
                 console.log(`❌ Order ${order.orderId} payment failed`)
             }
         }
+
+        res.status(200).json({ success: true, message: 'Webhook received.' })
+    } catch (err) {
+        console.error('Webhook error:', err)
         res.status(500).json({ success: false, message: 'Webhook processing failed.' })
     }
 })
