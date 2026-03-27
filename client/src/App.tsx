@@ -19,7 +19,6 @@ import {
   fetchMyOrders,
   cancelOrder,
   fetchAddresses,
-  addAddress,
   deleteAddress,
   fetchWallet,
   adminLogin,
@@ -224,10 +223,6 @@ function App() {
 
   // Saved addresses
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([])
-  const [addAddrOpen, setAddAddrOpen] = useState(false)
-  const [addAddrForm, setAddAddrForm] = useState({ label: 'Home', firstName: '', lastName: '', phone: '', address: '', city: '', pincode: '' })
-  const [addAddrLoading, setAddAddrLoading] = useState(false)
-  const [addAddrError, setAddAddrError] = useState('')
 
   // Wallet
   const [wallet, setWallet] = useState<WalletData>({ balance: 0, transactions: [] })
@@ -296,26 +291,14 @@ function App() {
   }
 
   // ── Address handlers ────────────────────────────────────────
-  async function handleAddAddress(e: React.FormEvent) {
-    e.preventDefault()
-    const token = await getToken()
-    if (!token) return
-    setAddAddrLoading(true)
-    setAddAddrError('')
+  async function refreshSavedAddresses() {
     try {
-      const created = await addAddress(token, addAddrForm)
-      setSavedAddresses((prev) => [...prev, created])
-      setAddAddrOpen(false)
-      setAddAddrForm({ label: 'Home', firstName: '', lastName: '', phone: '', address: '', city: '', pincode: '' })
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to save address.'
-      if (msg.toLowerCase().includes('authenticated') || msg.toLowerCase().includes('401')) {
-        handleLogout()
-      } else {
-        setAddAddrError(msg)
-      }
-    } finally {
-      setAddAddrLoading(false)
+      const token = await getToken()
+      if (!token) return
+      const addrs = await fetchAddresses(token)
+      setSavedAddresses(addrs)
+    } catch (err) {
+      console.error('Failed to load addresses:', err)
     }
   }
 
@@ -1118,54 +1101,7 @@ function App() {
                           ))}
                         </div>
 
-                        {addAddrOpen ? (
-                          <form className="add-address-form" onSubmit={handleAddAddress}>
-                            <h4 className="add-address-title">New Address</h4>
-                            {addAddrError && (
-                              <div className="contact-error">⚠ {addAddrError}</div>
-                            )}
-                            <div className="contact-form-row">
-                              <div className="contact-field">
-                                <label className="contact-label">Label</label>
-                                <input className="contact-input" placeholder="Home / Office" value={addAddrForm.label} onChange={e => setAddAddrForm(p => ({ ...p, label: e.target.value }))} />
-                              </div>
-                              <div className="contact-field">
-                                <label className="contact-label">Phone</label>
-                                <input className="contact-input" type="tel" placeholder="+91 98765 43210" value={addAddrForm.phone} onChange={e => setAddAddrForm(p => ({ ...p, phone: e.target.value }))} />
-                              </div>
-                            </div>
-                            <div className="contact-form-row">
-                              <div className="contact-field">
-                                <label className="contact-label">First name</label>
-                                <input className="contact-input" placeholder="Rahul" value={addAddrForm.firstName} onChange={e => setAddAddrForm(p => ({ ...p, firstName: e.target.value }))} />
-                              </div>
-                              <div className="contact-field">
-                                <label className="contact-label">Last name</label>
-                                <input className="contact-input" placeholder="Doe" value={addAddrForm.lastName} onChange={e => setAddAddrForm(p => ({ ...p, lastName: e.target.value }))} />
-                              </div>
-                            </div>
-                            <div className="contact-field">
-                              <label className="contact-label">Street Address</label>
-                              <input className="contact-input" placeholder="House no., Street, Landmark" value={addAddrForm.address} onChange={e => setAddAddrForm(p => ({ ...p, address: e.target.value }))} required />
-                            </div>
-                            <div className="contact-form-row">
-                              <div className="contact-field">
-                                <label className="contact-label">City</label>
-                                <input className="contact-input" placeholder="Shimla" value={addAddrForm.city} onChange={e => setAddAddrForm(p => ({ ...p, city: e.target.value }))} required />
-                              </div>
-                              <div className="contact-field">
-                                <label className="contact-label">Pincode</label>
-                                <input className="contact-input" placeholder="171001" value={addAddrForm.pincode} onChange={e => setAddAddrForm(p => ({ ...p, pincode: e.target.value }))} required />
-                              </div>
-                            </div>
-                            <div className="add-address-actions">
-                              <button type="button" className="btn account-logout-btn" onClick={() => setAddAddrOpen(false)}>Cancel</button>
-                              <button type="submit" className="btn btn-primary" disabled={addAddrLoading}>{addAddrLoading ? 'Saving…' : 'Save Address'}</button>
-                            </div>
-                          </form>
-                        ) : (
-                          <button className="btn btn-primary add-address-btn" onClick={() => { setAddAddrOpen(true); setAddAddrError('') }}>+ Add New Address</button>
-                        )}
+
                       </div>
                     )}
 

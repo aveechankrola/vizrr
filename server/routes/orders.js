@@ -90,10 +90,14 @@ router.post('/', async (req, res) => {
 // GET /api/orders/my  — orders for the logged-in user
 router.get('/my', requireAuth(), async (req, res) => {
   try {
-    const userId = req.auth.userId
+    const userId = req.auth?.userId
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' })
+    }
     const myOrders = await Order.find({ userId }).sort({ placedAt: -1 })
     res.json({ success: true, data: myOrders })
   } catch (err) {
+    console.error('Error fetching orders:', err)
     res.status(500).json({ success: false, message: err.message })
   }
 })
@@ -101,7 +105,10 @@ router.get('/my', requireAuth(), async (req, res) => {
 // PATCH /api/orders/:id/cancel
 router.patch('/:id/cancel', requireAuth(), async (req, res) => {
   try {
-    const userId = req.auth.userId
+    const userId = req.auth?.userId
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' })
+    }
     const order = await Order.findOne({ orderId: req.params.id, userId })
     if (!order) return res.status(404).json({ success: false, message: 'Order not found.' })
     if (order.status === 'cancelled') {
@@ -114,6 +121,7 @@ router.patch('/:id/cancel', requireAuth(), async (req, res) => {
     await order.save()
     res.json({ success: true, data: order })
   } catch (err) {
+    console.error('Error cancelling order:', err)
     res.status(500).json({ success: false, message: err.message })
   }
 })
