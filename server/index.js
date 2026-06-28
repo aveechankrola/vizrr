@@ -54,14 +54,11 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
 
-// Clerk auth middleware for protected routes
-app.use(clerkMiddleware);
-
 // Protected routes
-app.use('/api/cart', cartRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/ai', aiRoutes);
+app.use('/api/cart', clerkMiddleware, cartRoutes);
+app.use('/api/orders', clerkMiddleware, orderRoutes);
+app.use('/api/users', clerkMiddleware, userRoutes);
+app.use('/api/ai', clerkMiddleware, aiRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
