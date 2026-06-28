@@ -1,37 +1,28 @@
-const express = require('express')
-const router = express.Router()
-const Product = require('../models/Product')
+const express = require('express');
+const router = express.Router();
+const { upload } = require('../config/cloudinary');
+const { optionalClerkMiddleware, clerkMiddleware } = require('../middleware/clerkAuth');
+const {
+  getProducts,
+  getProduct,
+  getProductsByFaceShape,
+  searchProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  getSaleProducts,
+} = require('../controllers/productController');
 
-// GET /api/products
-// Query params: ?category=chocolate-cake|chocolate  ?sale=true  ?sort=priceLow|priceHigh|featured
-router.get('/', async (req, res) => {
-  try {
-    const { category, sale, sort } = req.query
-    const filter = {}
-    if (category === 'chocolate-cake' || category === 'chocolate') filter.category = category
-    if (sale === 'true') filter.onSale = true
+// Public routes
+router.get('/', getProducts);
+router.get('/search', searchProducts);
+router.get('/sale', getSaleProducts);
+router.get('/by-face-shape/:faceShape', getProductsByFaceShape);
+router.get('/:id', getProduct);
 
-    let query = Product.find(filter)
-    if (sort === 'priceLow') query = query.sort({ price: 1 })
-    else if (sort === 'priceHigh') query = query.sort({ price: -1 })
-    else query = query.sort({ createdAt: 1 })
+// Admin routes (protected)
+router.post('/', clerkMiddleware, upload.single('image'), createProduct);
+router.put('/:id', clerkMiddleware, upload.single('image'), updateProduct);
+router.delete('/:id', clerkMiddleware, deleteProduct);
 
-    const products = await query
-    res.json({ success: true, data: products.map(p => ({ ...p.toObject(), id: p._id.toString() })) })
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message })
-  }
-})
-
-// GET /api/products/:id
-router.get('/:id', async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id)
-    if (!product) return res.status(404).json({ success: false, message: 'Product not found' })
-    res.json({ success: true, data: { ...product.toObject(), id: product._id.toString() } })
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message })
-  }
-})
-
-module.exports = router
+module.exports = router;

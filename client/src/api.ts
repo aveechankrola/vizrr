@@ -1,6 +1,16 @@
-const BASE = 'https://api.keprates.in/api'
+const BASE = import.meta.env.VITE_API_BASE || '/api'
 
-export type ProductCategory = 'chocolate-cake' | 'chocolate'
+async function parseJson(res: Response) {
+  const text = await res.text()
+  if (!text) return { success: false, message: res.statusText || 'Empty response', status: res.status }
+  try {
+    return JSON.parse(text)
+  } catch (err) {
+    return { success: false, message: 'Invalid JSON response', raw: text, status: res.status }
+  }
+}
+
+export type ProductCategory = 'sunglasses' | 'eyeglasses'
 
 export type Product = {
   id: string
@@ -49,7 +59,7 @@ export async function fetchProducts(params?: {
   if (params?.sort && params.sort !== 'featured') query.set('sort', params.sort)
 
   const res = await fetch(`${BASE}/products?${query}`)
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json.data
 }
@@ -59,7 +69,7 @@ export async function fetchProducts(params?: {
 export async function fetchCart(): Promise<CartResponse> {
 
   const res = await fetch(`${BASE}/cart`)
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json
 }
@@ -70,7 +80,7 @@ export async function addToCart(productId: string, quantity = 1): Promise<{ coun
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ productId, quantity }),
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return { count: json.count }
 }
@@ -81,20 +91,20 @@ export async function updateCartItem(itemId: number, quantity: number): Promise<
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ quantity }),
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
 }
 
 export async function removeCartItem(itemId: number): Promise<{ count: number }> {
   const res = await fetch(`${BASE}/cart/${itemId}`, { method: 'DELETE' })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return { count: json.count }
 }
 
 export async function clearCart(): Promise<void> {
   const res = await fetch(`${BASE}/cart`, { method: 'DELETE' })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
 }
 
@@ -126,7 +136,7 @@ export async function registerUser(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ firstName, lastName, email, password, phone }),
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json
 }
@@ -137,7 +147,7 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json
 }
@@ -183,7 +193,7 @@ export async function placeOrder(
     headers,
     body: JSON.stringify({ customer, items, paymentMethod }),
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json.data
 }
@@ -214,7 +224,7 @@ export async function cancelOrder(token: string, orderId: string): Promise<void>
     method: 'PATCH',
     headers: { Authorization: `Bearer ${token}` },
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
 }
 
@@ -222,7 +232,7 @@ export async function fetchMyOrders(token: string): Promise<MyOrder[]> {
   const res = await fetch(`${BASE}/orders/my`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json.data
 }
@@ -245,7 +255,7 @@ export async function fetchAddresses(token: string): Promise<SavedAddress[]> {
   const res = await fetch(`${BASE}/addresses`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json.data
 }
@@ -259,7 +269,7 @@ export async function addAddress(
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json.data
 }
@@ -290,7 +300,7 @@ export async function fetchWallet(token: string): Promise<WalletData> {
   const res = await fetch(`${BASE}/wallet`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json.data
 }
@@ -320,7 +330,7 @@ export async function createPaymentLink(
       customerPhone,
     }),
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json.data
 }
@@ -352,7 +362,7 @@ export async function adminLogin(email: string, password: string): Promise<strin
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json.token
 }
@@ -366,14 +376,14 @@ export async function adminLogout(token: string): Promise<void> {
 
 export async function fetchAdminStats(token: string): Promise<AdminStats> {
   const res = await fetch(`${BASE}/admin/stats`, { headers: { Authorization: `Bearer ${token}` } })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json.data
 }
 
 export async function fetchAdminOrders(token: string): Promise<MyOrder[]> {
   const res = await fetch(`${BASE}/admin/orders`, { headers: { Authorization: `Bearer ${token}` } })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json.data
 }
@@ -384,24 +394,47 @@ export async function adminUpdateOrderStatus(token: string, orderId: string, sta
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ status }),
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
 }
 
 export async function fetchAdminProducts(token: string): Promise<Product[]> {
   const res = await fetch(`${BASE}/admin/products`, { headers: { Authorization: `Bearer ${token}` } })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json.data
 }
 
-export async function adminAddProduct(token: string, product: Omit<Product, 'id'>): Promise<Product> {
-  const res = await fetch(`${BASE}/admin/products`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify(product),
-  })
-  const json = await res.json()
+export async function adminAddProduct(
+  token: string,
+  product: Omit<Product, 'id' | 'image'> & { image: string | File },
+): Promise<Product> {
+  let res
+  const image = product.image
+  if (image instanceof File) {
+    const form = new FormData()
+    form.append('name', product.name)
+    form.append('category', product.category)
+    form.append('price', String(product.price))
+    if (product.originalPrice != null) form.append('originalPrice', String(product.originalPrice))
+    form.append('onSale', product.onSale ? '1' : '0')
+    form.append('description', product.description || '')
+    form.append('rating', String(product.rating))
+    form.append('image', image)
+
+    res = await fetch(`${BASE}/admin/products`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+    })
+  } else {
+    res = await fetch(`${BASE}/admin/products`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(product),
+    })
+  }
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json.data
 }
@@ -411,13 +444,13 @@ export async function adminDeleteProduct(token: string, id: string): Promise<voi
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
 }
 
 export async function fetchAdminUsers(token: string): Promise<AdminUser[]> {
   const res = await fetch(`${BASE}/admin/users`, { headers: { Authorization: `Bearer ${token}` } })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json.data
 }
@@ -430,7 +463,7 @@ export async function submitContact(payload: ContactPayload): Promise<string> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   })
-  const json = await res.json()
+  const json = await parseJson(res)
   if (!json.success) throw new Error(json.message)
   return json.message
 }

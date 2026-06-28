@@ -1,69 +1,88 @@
-require('dotenv').config({ path: require('path').join(__dirname, '.env') })
-const express = require('express')
-const cors = require('cors')
-const path = require('path')
-const { clerkMiddleware } = require('@clerk/express')
-const connectDB = require('./db')
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const compression = require('compression');
+const path = require('path');
+const fs = require('fs');
+require('dotenv').config();
 
-const productsRouter = require('./routes/products')
-const cartRouter = require('./routes/cart')
-const contactRouter = require('./routes/contact')
-const ordersRouter = require('./routes/orders')
-const authRouter = require('./routes/auth')
-const addressesRouter = require('./routes/addresses')
-const walletRouter = require('./routes/wallet')
-const adminRouter = require('./routes/admin')
-const paymentRouter = require('./routes/payment')
+const { connectDB } = require('./config/db');
+const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
+const { clerkMiddleware } = require('./middleware/clerkAuth');
 
-const app = express()
-const PORT = process.env.PORT || 4000
+// Import routes
+const productRoutes = require('./routes/products');
+const cartRoutes = require('./routes/cart');
+const orderRoutes = require('./routes/orders');
+const userRoutes = require('./routes/users');
+const aiRoutes = require('./routes/ai');
+const authRoutes = require('./routes/auth');
 
-// ── Connect to MongoDB ────────────────────────────────────────
-connectDB()
+const app = express();
+const PORT = process.env.PORT || 5000;
 
-// ── Middleware ────────────────────────────────────────────────
+// Connect to MongoDB
+connectDB();
+
+// Middleware
+app.use(helmet());
+app.use(compression());
+const defaultOrigins = [
+  'http://localhost:5173',
+  'capacitor://localhost',
+  'http://localhost',
+  'https://localhost',
+];
+const corsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
+  : defaultOrigins;
+
 app.use(cors({
-  origin: ["http://localhost:5173", "https://www.keprates.in", "https://keprates.in"],
-  credentials: true
-}))
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+  origin(origin, callback) {
+    if (!origin || corsOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true,
+}));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// ── Routes ────────────────────────────────────────────────────
-app.use('/api/products', productsRouter)
-app.use('/api/cart', cartRouter)
-app.use('/api/contact', contactRouter)
-app.use('/api/orders', clerkMiddleware(), ordersRouter)
-app.use('/api/auth', authRouter)
-app.use('/api/addresses', clerkMiddleware(), addressesRouter)
-app.use('/api/wallet', clerkMiddleware(), walletRouter)
-app.use('/api/admin', clerkMiddleware(), adminRouter)
-app.use('/api/payment', paymentRouter)
+// Public routes (no auth required)
+app.use('/api/products', productRoutes);
+app.use('/api/auth', authRoutes);
 
-// ── Health check ──────────────────────────────────────────────
-app.get('/api/health', (_req, res) => {
-  res.json({ success: true, message: 'Keprates API is running', timestamp: new Date().toISOString() })
-})
+// Clerk auth middleware for protected routes
+app.use(clerkMiddleware);
 
-// ── Error handler ─────────────────────────────────────────────
-app.use((err, _req, res, _next) => {
-  console.error(err.stack)
-  res.status(500).json({ success: false, message: 'Internal server error' })
-})
+// Protected routes
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/ai', aiRoutes);
 
-// ── 404 handler ───────────────────────────────────────────────
-app.use((req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' })
-})
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'Server is running', timestamp: new Date() });
+});
+
+// Production: serve Vite build from client/dist (same-origin HTTPS for web + PWA)
+const clientDist = path.resolve(__dirname, '../client/dist');
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
+
+// Error handling
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`✅  Keprates API running at http://localhost:${PORT}`)
-  console.log(`   GET  /api/products`)
-  console.log(`   GET  /api/products/:id`)
-  console.log(`   GET  /api/cart`)
-  console.log(`   POST /api/cart`)
-  console.log(`   PATCH /api/cart/:itemId`)
-  console.log(`   DELETE /api/cart/:itemId`)
-  console.log(`   POST /api/contact`)
-  console.log(`   GET  /api/health`)
-})
+  console.log(`🚀 Vizrr Server running on http://localhost:${PORT}`);
+  console.log(`📡 API available at http://localhost:${PORT}/api`);
+});

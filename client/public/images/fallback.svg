@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Eyewear fallback illustration">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f3e8ff"/>
+      <stop offset="55%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#10002b"/>
+    </linearGradient>
+    <linearGradient id="lens" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#c4b5fd" stop-opacity="0.7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" rx="72" fill="url(#bg)"/>
+  <circle cx="245" cy="195" r="110" fill="#ffffff" opacity="0.12"/>
+  <circle cx="930" cy="610" r="160" fill="#ffffff" opacity="0.08"/>
+  <g transform="translate(180 220)">
+    <path d="M0 110C40 55 92 28 160 28h160c68 0 120 27 160 82l32 44c22 31 52 46 90 46h18c36 0 62-26 62-62 0-18-6-35-18-48l-16-18" fill="none" stroke="#ffe8a3" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M0 110c44-11 81-17 112-17" fill="none" stroke="#ffe8a3" stroke-width="26" stroke-linecap="round"/>
+    <path d="M840 110c-44-11-81-17-112-17" fill="none" stroke="#ffe8a3" stroke-width="26" stroke-linecap="round"/>
+    <circle cx="250" cy="190" r="132" fill="url(#lens)" stroke="#ffe8a3" stroke-width="26"/>
+    <circle cx="490" cy="190" r="132" fill="url(#lens)" stroke="#ffe8a3" stroke-width="26"/>
+    <path d="M378 190h-6" stroke="#ffe8a3" stroke-width="22" stroke-linecap="round"/>
+    <path d="M116 168c-60 0-108 48-108 108" fill="none" stroke="#ffe8a3" stroke-width="26" stroke-linecap="round"/>
+    <path d="M624 168c60 0 108 48 108 108" fill="none" stroke="#ffe8a3" stroke-width="26" stroke-linecap="round"/>
+  </g>
+  <text x="600" y="690" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="700" fill="#ffffff">Eyewear preview unavailable</text>
+</svg>

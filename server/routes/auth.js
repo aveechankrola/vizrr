@@ -1,108 +1,111 @@
-const express = require('express')
-const router = express.Router()
-const crypto = require('crypto')
-const User = require('../models/User')
-const { sessions } = require('../data/store')
+const express = require('express');
+const router = express.Router();
+const User = require('../models/User');
+const { asyncHandler } = require('../middleware/errorHandler');
+const { clerkMiddleware } = require('../middleware/clerkAuth');
 
-function hashPassword(plain) {
-  return crypto.createHash('sha256').update(plain + 'keprates_salt').digest('hex')
-}
+/**
+ * Webhook for Clerk user events
+ * Clerk will send POST requests to this endpoint when user events occur
+ */
+router.post('/webhook/clerk', asyncHandler(async (req, res) => {
+  const { type, data } = req.body;
 
-function generateToken() {
-  return crypto.randomBytes(32).toString('hex')
-}
+  // Verify webhook signature (in production, verify with Clerk's webhook secret)
+  
+  switch (type) {
+    case 'user.created':
+      // Create user in database
+      const newUser = new User({
+        clerkId: data.id,
+        email: data.email_addresses[0]?.email_address,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        imageUrl: data.image_url,
+      });
+      await newUser.save();
+      console.log('✓ User created:', newUser._id);
+      break;
 
-// ── POST /api/auth/register ──────────────────────────────────
-router.post('/register', async (req, res) => {
-  try {
-    const { firstName, lastName, email, password } = req.body
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({ success: false, message: 'All fields are required.' })
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ success: false, message: 'Invalid email address.' })
-    }
-    if (password.length < 6) {
-      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' })
-    }
-    const existing = await User.findOne({ email: email.toLowerCase().trim() })
-    if (existing) {
-      return res.status(409).json({ success: false, message: 'An account with this email already exists.' })
-    }
+    case 'user.updated':
+      // Update user in database
+      await User.findOneAndUpdate(
+        { clerkId: data.id },
+        {
+          email: data.email_addresses[0]?.email_address,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          imageUrl: data.image_url,
+        }
+      );
+      console.log('✓ User updated:', data.id);
+      break;
 
-    const { phone } = req.body
-    const user = await User.create({
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      email: email.toLowerCase().trim(),
-      phone: phone?.trim() || '',
-      passwordHash: hashPassword(password),
-    })
+    case 'user.deleted':
+      // Delete user from database
+      await User.findOneAndDelete({ clerkId: data.id });
+      console.log('✓ User deleted:', data.id);
+      break;
 
-    const token = generateToken()
-    sessions[token] = user._id.toString()
-
-    res.status(201).json({
-      success: true,
-      message: 'Account created!',
-      token,
-      user: { id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, phone: user.phone },
-    })
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message })
+    default:
+      console.log('Unhandled event type:', type);
   }
-})
 
-// ── POST /api/auth/login ─────────────────────────────────────
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email and password are required.' })
-    }
+  res.json({ success: true });
+}));
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() })
-    if (!user || user.passwordHash !== hashPassword(password)) {
-      return res.status(401).json({ success: false, message: 'Incorrect email or password.' })
-    }
+/**
+ * Login endpoint - saves Clerk user to database if not exists
+ */
+router.post('/login', clerkMiddleware, asyncHandler(async (req, res) => {
+  const userId = req.user.id;
 
-    const token = generateToken()
-    sessions[token] = user._id.toString()
+  let user = await User.findOne({ clerkId: userId });
 
-    res.json({
-      success: true,
-      message: 'Welcome back!',
-      token,
-      user: { id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, phone: user.phone },
-    })
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message })
+  if (!user) {
+    user = new User({
+      clerkId: userId,
+      email: req.user.email,
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
+      imageUrl: req.user.imageUrl,
+    });
+    await user.save();
   }
-})
 
-// ── POST /api/auth/logout ────────────────────────────────────
-router.post('/logout', (req, res) => {
-  const token = req.headers.authorization?.replace('Bearer ', '')
-  if (token && sessions[token]) delete sessions[token]
-  res.json({ success: true, message: 'Logged out.' })
-})
+  user.lastLoginAt = new Date();
+  await user.save();
 
-// ── GET /api/auth/me ─────────────────────────────────────────
-router.get('/me', async (req, res) => {
-  try {
-    const token = req.headers.authorization?.replace('Bearer ', '')
-    if (!token || !sessions[token]) {
-      return res.status(401).json({ success: false, message: 'Not authenticated.' })
-    }
-    const user = await User.findById(sessions[token])
-    if (!user) return res.status(404).json({ success: false, message: 'User not found.' })
-    res.json({
-      success: true,
-      user: { id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, phone: user.phone },
-    })
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message })
-  }
-})
+  res.json({
+    success: true,
+    user: {
+      id: user._id,
+      clerkId: user.clerkId,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    },
+  });
+}));
 
-module.exports = router
+/**
+ * Verify token endpoint
+ */
+router.post('/verify-token', clerkMiddleware, asyncHandler(async (req, res) => {
+  res.json({
+    success: true,
+    user: req.user,
+  });
+}));
+
+/**
+ * Logout endpoint (client-side Clerk logout is still needed)
+ */
+router.post('/logout', asyncHandler(async (req, res) => {
+  res.json({
+    success: true,
+    message: 'Logged out successfully',
+  });
+}));
+
+module.exports = router;
