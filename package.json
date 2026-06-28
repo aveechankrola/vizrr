@@ -2,7 +2,7 @@
   "name": "cake-app",
   "version": "1.0.0",
   "scripts": {
-    "build": "npm install --prefix client && npm run build --prefix client && npm install --prefix server --omit=dev",
+    "build": "npm install --prefix client --include=dev && npm run build --prefix client && npm install --prefix server --omit=dev",
     "start": "node server/index.js",
     "app:android": "npm run app:android --prefix client",
     "app:iphone": "npm run app:iphone --prefix client",
